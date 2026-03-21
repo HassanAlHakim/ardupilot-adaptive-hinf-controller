@@ -30,8 +30,8 @@ const AP_Param::GroupInfo AC_CustomControl_Empty::var_info[] = {
 };
 
 // initialize in the constructor
-AC_CustomControl_Empty::AC_CustomControl_Empty(AC_CustomControl& frontend, AP_AHRS_View*& ahrs, AC_AttitudeControl*& att_control, AP_MotorsMulticopter*& motors, float dt) :
-    AC_CustomControl_Backend(frontend, ahrs, att_control, motors, dt)
+AC_CustomControl_Empty::AC_CustomControl_Empty(AC_CustomControl& frontend, AP_AHRS_View*& ahrs, AC_AttitudeControl*& att_control, AP_MotorsMulticopter*& motors,AC_PosControl*& pos_control,Thrust_Linearization*& thrust_lin, float dt) :
+    AC_CustomControl_Backend(frontend, ahrs, att_control, motors,pos_control,thrust_lin, dt)
 {
     AP_Param::setup_object_defaults(this, var_info);
 }

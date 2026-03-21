@@ -216,6 +216,12 @@ public:
         _log_pause = value;
     }
 
+    void Write_MIXI(float roll, float pitch, float yaw, float thrust);
+
+    void Write_HRLS(float e_phi, float e_theta, float e_psi, float p, float q, float r, float tau_x, float tau_y, float tau_z);
+
+    void Write_ORLS(float inverse_Ix_hat,float inverse_Iy_hat,float inverse_Iz_hat);
+
     // erase handling
     void EraseAll();
 
@@ -613,6 +619,11 @@ private:
     void file_content_update(FileContent &file_content);
 #endif
 };
+
+
+
+
+
 
 namespace AP {
     AP_Logger &logger();

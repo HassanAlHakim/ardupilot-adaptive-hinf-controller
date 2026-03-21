@@ -7,6 +7,7 @@
 #include "AC_CustomControl_Backend.h"
 // #include "AC_CustomControl_Empty.h"
 #include "AC_CustomControl_PID.h"
+#include "AC_CustomControl_XYZ.h"
 #include <GCS_MAVLink/GCS.h>
 #include <AP_Logger/AP_Logger.h>
 
@@ -33,16 +34,21 @@ const AP_Param::GroupInfo AC_CustomControl::var_info[] = {
     // parameters for PID controller
     AP_SUBGROUPVARPTR(_backend, "2_", 7, AC_CustomControl, _backend_var_info[1]),
 
+    // parameters for XYZ controller
+    AP_SUBGROUPVARPTR(_backend, "3_", 8, AC_CustomControl, _backend_var_info[2]),
+
     AP_GROUPEND
 };
 
 const struct AP_Param::GroupInfo *AC_CustomControl::_backend_var_info[CUSTOMCONTROL_MAX_TYPES];
 
-AC_CustomControl::AC_CustomControl(AP_AHRS_View*& ahrs, AC_AttitudeControl*& att_control, AP_MotorsMulticopter*& motors, float dt) :
+AC_CustomControl::AC_CustomControl(AP_AHRS_View*& ahrs, AC_AttitudeControl*& att_control, AP_MotorsMulticopter*& motors,AC_PosControl*& pos_control,Thrust_Linearization*& thrust_lin, float dt) :
     _dt(dt),
     _ahrs(ahrs),
     _att_control(att_control),
-    _motors(motors)
+    _motors(motors),
+    _pos_control(pos_control),
+    _thrust_lin(thrust_lin)
 {
     AP_Param::setup_object_defaults(this, var_info);
 }
@@ -59,9 +65,13 @@ void AC_CustomControl::init(void)
             // _backend_var_info[get_type()] = AC_CustomControl_Empty::var_info;
             break;
         case CustomControlType::CONT_PID:
-            _backend = NEW_NOTHROW AC_CustomControl_PID(*this, _ahrs, _att_control, _motors, _dt);
+            _backend = NEW_NOTHROW AC_CustomControl_PID(*this, _ahrs, _att_control, _motors,_pos_control,_thrust_lin, _dt);
             _backend_var_info[get_type()] = AC_CustomControl_PID::var_info;
             break;
+        case CustomControlType::CONT_XYZ:
+            _backend = NEW_NOTHROW AC_CustomControl_XYZ(*this, _ahrs, _att_control, _motors,_pos_control,_thrust_lin, _dt);
+            _backend_var_info[get_type()] = AC_CustomControl_XYZ::var_info;
+            break;            
         default:
             return;
     }

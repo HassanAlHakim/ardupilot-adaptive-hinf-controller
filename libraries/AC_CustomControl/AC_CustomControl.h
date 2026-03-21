@@ -7,21 +7,25 @@
 
 #if AP_CUSTOMCONTROL_ENABLED
 
+
+
 #include <AP_Common/AP_Common.h>
 #include <AP_Param/AP_Param.h>
 #include <AP_AHRS/AP_AHRS_View.h>
 #include <AC_AttitudeControl/AC_AttitudeControl.h>
 #include <AP_Motors/AP_MotorsMulticopter.h>
+#include <AC_AttitudeControl/AC_PosControl.h>   // add this
+#include <AP_Motors/AP_Motors_Thrust_Linearization.h> // add this
 
 #ifndef CUSTOMCONTROL_MAX_TYPES
-#define CUSTOMCONTROL_MAX_TYPES 2
+#define CUSTOMCONTROL_MAX_TYPES 3
 #endif
 
 class AC_CustomControl_Backend;
 
 class AC_CustomControl {
 public:
-    AC_CustomControl(AP_AHRS_View*& ahrs, AC_AttitudeControl*& _att_control, AP_MotorsMulticopter*& motors, float dt);
+    AC_CustomControl(AP_AHRS_View*& ahrs, AC_AttitudeControl*& _att_control, AP_MotorsMulticopter*& motors,AC_PosControl*& pos_control,Thrust_Linearization*& thrust_lin, float dt);
 
     CLASS_NO_COPY(AC_CustomControl);  /* Do not allow copies */
 
@@ -49,6 +53,7 @@ protected:
         CONT_NONE            = 0,
         CONT_EMPTY           = 1,
         CONT_PID             = 2,
+        CONT_XYZ             = 3,
     };            // controller that should be used     
 
     enum class  CustomControlOption {
@@ -65,6 +70,8 @@ protected:
     AP_AHRS_View*& _ahrs;
     AC_AttitudeControl*& _att_control;
     AP_MotorsMulticopter*& _motors;
+    AC_PosControl*& _pos_control;
+    Thrust_Linearization*& _thrust_lin;
 
     AP_Enum<CustomControlType> _controller_type;
     AP_Int8 _custom_controller_mask;

@@ -480,11 +480,12 @@ private:
     AC_AttitudeControl *attitude_control;
     const struct AP_Param::GroupInfo *attitude_control_var_info;
     AC_PosControl *pos_control;
+    Thrust_Linearization *thrust_lin;
     AC_WPNav *wp_nav;
     AC_Loiter *loiter_nav;
 
 #if AC_CUSTOMCONTROL_MULTI_ENABLED
-    AC_CustomControl custom_control{ahrs_view, attitude_control, motors, scheduler.get_loop_period_s()};
+    AC_CustomControl custom_control{ahrs_view, attitude_control, motors,pos_control,thrust_lin, scheduler.get_loop_period_s()};
 #endif
 
 #if MODE_CIRCLE_ENABLED
@@ -916,6 +917,7 @@ private:
     void Log_Write_Data(LogDataID id, float value);
     void Log_Write_Parameter_Tuning(uint8_t param, float tuning_val, float tune_min, float tune_max);
     void Log_Video_Stabilisation();
+    void Log_Write_MixerInputs(float u_roll,float u_pitch, float u_yaw, float u_z);
     void Log_Write_Guided_Position_Target(ModeGuided::SubMode submode, const Vector3f& pos_target, bool terrain_alt, const Vector3f& vel_target, const Vector3f& accel_target);
     void Log_Write_Guided_Attitude_Target(ModeGuided::SubMode target_type, float roll, float pitch, float yaw, const Vector3f &ang_vel, float thrust, float climb_rate);
     void Log_Write_SysID_Setup(uint8_t systemID_axis, float waveform_magnitude, float frequency_start, float frequency_stop, float time_fade_in, float time_const_freq, float time_record, float time_fade_out);

@@ -753,6 +753,9 @@ bool AP_Logger::WriteBlock_first_succeed(const void *pBuffer, uint16_t size)
     return backends[0]->WriteBlock(pBuffer, size);
 }
 
+
+
+
 // write a replay block. This differs from other as it returns false if a backend doesn't
 // have space for the msg
 bool AP_Logger::WriteReplayBlock(uint8_t msg_id, const void *pBuffer, uint16_t size) {
@@ -1749,4 +1752,58 @@ AP_Logger &logger()
 
 };
 
+void AP_Logger::Write_MIXI(float roll, float pitch, float yaw, float thrust)
+{
+    
+
+    const struct log_MIXI pkt {
+        LOG_PACKET_HEADER_INIT(LOG_MIXI_MSG),
+        time_us : AP_HAL::micros64(),
+        roll    : roll,
+        pitch   : pitch,
+        yaw     : yaw,
+        thrust  : thrust
+    };
+
+    WriteBlock(&pkt, sizeof(pkt));
+}
+
+void AP_Logger::Write_HRLS(float e_phi, float e_theta, float e_psi, float p, float q, float r, float tau_x, float tau_y, float tau_z)
+{
+    
+
+    const struct log_HRLS pkt {
+        LOG_PACKET_HEADER_INIT(LOG_HRLS_MSG),
+        time_us : AP_HAL::micros64(),
+        e_phi    : e_phi,
+        e_theta   : e_theta,
+        e_psi     : e_psi,
+        p  : p,
+        q  : q,
+        r :  r,
+        tau_x  : tau_x,
+        tau_y  : tau_y,
+        tau_z  : tau_z
+    };
+
+    WriteBlock(&pkt, sizeof(pkt));
+}
+
+void AP_Logger::Write_ORLS(float inverse_Ix_hat,float inverse_Iy_hat,float inverse_Iz_hat)
+{
+    
+
+    const struct log_ORLS pkt {
+        LOG_PACKET_HEADER_INIT(LOG_ORLS_MSG),
+        time_us : AP_HAL::micros64(),
+        inverse_Ix_hat : inverse_Ix_hat,
+        inverse_Iy_hat : inverse_Iy_hat,
+        inverse_Iz_hat : inverse_Iz_hat,
+    };
+
+    WriteBlock(&pkt, sizeof(pkt));
+}
+
 #endif // HAL_LOGGING_ENABLED
+
+

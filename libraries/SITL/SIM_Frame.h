@@ -82,11 +82,12 @@ private:
      */
     const struct Model {
         // model mass kg
-        float mass = 3.0;
+        // float mass = 3.0;
+        float mass = 12.175;
 
         // diameter of model
-        float diagonal_size = 0.35;
-
+        // float diagonal_size = 0.35;
+        float diagonal_size = 1.2;
         /*
           the ref values are for a test at fixed angle, used to estimate drag
          */
@@ -99,7 +100,8 @@ private:
         float refBatRes = 0.01; // BAT.Res
 
         // full pack voltage
-        float maxVoltage = 4.2*3;
+        // float maxVoltage = 4.2*3;
+        float maxVoltage = 4.2*6;
 
         // battery capacity in Ah. Use zero for unlimited
         float battCapacityAh = 0.0;

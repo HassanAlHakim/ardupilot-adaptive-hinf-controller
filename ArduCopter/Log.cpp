@@ -23,6 +23,9 @@ struct PACKED log_Control_Tuning {
     int16_t  climb_rate;
 };
 
+
+
+
 // Write a control tuning packet
 void Copter::Log_Write_Control_Tuning()
 {
@@ -354,6 +357,7 @@ struct PACKED log_Rate_Thread_Dt {
     float dtMin;
 };
 
+
 // Write a Guided mode position target
 // pos_target is lat, lon, alt OR offset from ekf origin in cm
 // terrain should be 0 if pos_target.z is alt-above-ekf-origin, 1 if alt-above-terrain
@@ -377,6 +381,8 @@ void Copter::Log_Write_Guided_Position_Target(ModeGuided::SubMode target_type, c
     };
     logger.WriteBlock(&pkt, sizeof(pkt));
 }
+
+
 
 // Write a Guided mode attitude target
 // roll, pitch and yaw are in radians
@@ -523,6 +529,9 @@ const struct LogStructure Copter::log_structure[] = {
 
     { LOG_SYSIDS_MSG, sizeof(log_SysIdS),
       "SIDS", "QBfffffff",  "TimeUS,Ax,Mag,FSt,FSp,TFin,TC,TR,TFout", "s--ssssss", "F--------" , true },
+
+
+
 
 // @LoggerMessage: GUIP
 // @Description: Guided mode position target information

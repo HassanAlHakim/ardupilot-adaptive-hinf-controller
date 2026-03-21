@@ -16,6 +16,9 @@
 #include <AP_HAL/AP_HAL.h>
 #include "AP_MotorsMatrix.h"
 #include <AP_Vehicle/AP_Vehicle_Type.h>
+#include <AP_Logger/AP_Logger.h>
+
+
 
 extern const AP_HAL::HAL& hal;
 
@@ -92,6 +95,8 @@ bool AP_MotorsMatrix::init(uint8_t expected_num_motors)
     return true;
 }
 
+
+
 // Set throttle factor from scripting
 bool AP_MotorsMatrix::set_throttle_factor(int8_t motor_num, float throttle_factor)
 {
@@ -143,6 +148,10 @@ void AP_MotorsMatrix::set_frame_class_and_type(motor_frame_class frame_class, mo
 void AP_MotorsMatrix::output_to_motors()
 {
     int8_t i;
+    #if HAL_LOGGING_ENABLED
+    AP::logger().Write_MIXI(_roll_in, _pitch_in, _yaw_in, get_throttle());
+    #endif
+
 
     switch (_spool_state) {
         case SpoolState::SHUT_DOWN: {
@@ -180,6 +189,7 @@ void AP_MotorsMatrix::output_to_motors()
             rc_write(i, output_to_pwm(_actuator[i]));
         }
     }
+   
 }
 
 // get_motor_mask - returns a bitmask of which outputs are being used for motors (1 means being used)
@@ -199,6 +209,8 @@ uint32_t AP_MotorsMatrix::get_motor_mask()
 
     return mask;
 }
+
+
 
 // helper to return value scaled between boost and normal based on the value of _thrust_boost_ratio
 // _thrust_boost_ratio of 1 -> return = boost_value

@@ -9,11 +9,14 @@
 class AC_CustomControl_Backend
 {
 public:
-    AC_CustomControl_Backend(AC_CustomControl& frontend, AP_AHRS_View*& ahrs, AC_AttitudeControl*& att_control, AP_MotorsMulticopter*& motors, float dt) :
+    AC_CustomControl_Backend(AC_CustomControl& frontend, AP_AHRS_View*& ahrs, AC_AttitudeControl*& att_control,
+         AP_MotorsMulticopter*& motors,AC_PosControl*& pos_control,Thrust_Linearization*& thrust_lin, float dt) :
         _ahrs(ahrs),
         _att_control(att_control),
         _motors(motors),
-        _frontend(frontend)
+        _frontend(frontend),
+        _pos_control(pos_control),
+        _thrust_lin(thrust_lin)
     {}
 
     // empty destructor to suppress compiler warning
@@ -34,6 +37,8 @@ protected:
     AC_AttitudeControl*& _att_control;
     AP_MotorsMulticopter*& _motors;
     AC_CustomControl& _frontend;
+    AC_PosControl*& _pos_control;
+    Thrust_Linearization*& _thrust_lin;
 };
 
 #endif  // AP_CUSTOMCONTROL_ENABLED

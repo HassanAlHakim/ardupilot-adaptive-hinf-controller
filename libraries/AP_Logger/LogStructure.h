@@ -189,6 +189,16 @@ struct PACKED log_Format {
     char labels[64];
 };
 
+// struct PACKED log_Mix {  
+//     LOG_PACKET_HEADER;  
+//     uint64_t time_us;  
+//     float roll;  
+//     float pitch;  
+//     float yaw;  
+//     float thrust;  
+// };
+
+
 struct PACKED log_Unit {
     LOG_PACKET_HEADER;
     uint64_t time_us;
@@ -620,6 +630,37 @@ struct PACKED log_MotBatt {
     float th_average_max;
     float th_out;
     uint8_t mot_fail_flags;
+};
+
+struct PACKED log_MIXI {  
+    LOG_PACKET_HEADER;  
+    uint64_t time_us;  
+    float roll;      
+    float pitch;     
+    float yaw;       
+    float thrust;    
+};
+
+struct PACKED log_HRLS {  
+    LOG_PACKET_HEADER;  
+    uint64_t time_us;  
+    float e_phi;      
+    float e_theta;     
+    float e_psi;       
+    float p;
+    float q;
+    float r;
+    float tau_x;
+    float tau_y;
+    float tau_z;    
+};
+
+struct PACKED log_ORLS {  
+    LOG_PACKET_HEADER;  
+    uint64_t time_us;  
+    float inverse_Ix_hat;
+    float inverse_Iy_hat;
+    float inverse_Iz_hat;   
 };
 
 struct PACKED log_VER {
@@ -1158,6 +1199,12 @@ LOG_STRUCTURE_FROM_GPS \
       "RCI2",  "QHHHB",     "TimeUS,C15,C16,OMask,Flags", "sYY--", "F----", true }, \
     { LOG_RCOUT_MSG, sizeof(log_RCOUT), \
       "RCOU",  "QHHHHHHHHHHHHHH",     "TimeUS,C1,C2,C3,C4,C5,C6,C7,C8,C9,C10,C11,C12,C13,C14", "sYYYYYYYYYYYYYY", "F--------------", true  }, \
+    { LOG_MIXI_MSG, sizeof(log_MIXI), \
+      "MIXI", "Qffff", "TimeUS,Roll,Pitch,Yaw,Thrust", "s----", "F0000", true }, \
+    { LOG_HRLS_MSG, sizeof(log_HRLS), \
+      "HRLS", "Qfffffffff", "TimeUS,eR,eP,eY,p,q,r,tx,ty,tz", "s---------", "F000000000", true }, \
+    { LOG_ORLS_MSG, sizeof(log_ORLS), \
+      "ORLS", "Qfff", "TimeUS,iIx,iIy,iIz", "s---", "F000", true }, \
     { LOG_RCOUT2_MSG, sizeof(log_RCOUT2), \
       "RCO2",  "QHHHH",     "TimeUS,C15,C16,C17,C18", "sYYYY", "F----", true  }, \
     { LOG_RCOUT3_MSG, sizeof(log_RCOUT), \
@@ -1346,8 +1393,12 @@ enum LogMessages : uint8_t {
     LOG_RCOUT3_MSG,
     LOG_IDS_FROM_FENCE,
     LOG_IDS_FROM_HAL,
-
+    LOG_MIXI_MSG,
+    LOG_HRLS_MSG,
+    LOG_ORLS_MSG,
     _LOG_LAST_MSG_
+     
+    // log_Mix
 };
 
 // we reserve ID #255 for future expansion

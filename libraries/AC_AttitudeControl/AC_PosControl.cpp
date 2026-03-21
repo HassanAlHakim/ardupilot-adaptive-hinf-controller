@@ -980,7 +980,7 @@ bool AC_PosControl::is_active_U() const
 ///     Position and velocity errors are converted to velocity and acceleration targets using PID objects
 ///     Desired velocity and accelerations are added to these corrections as they are calculated
 ///     Kinematically consistent target position and desired velocity and accelerations should be provided before calling this function
-void AC_PosControl::update_U_controller()
+void AC_PosControl::update_U_controller() 
 {
     // check for ekf z-axis position reset
     handle_ekf_U_reset();
@@ -1039,6 +1039,8 @@ void AC_PosControl::update_U_controller()
     }
     thr_out += _motors.get_throttle_hover();
 
+    _last_thrust_cmd = thr_out;
+
     // Actuator commands
 
     // send throttle to attitude controller with angle boost
@@ -1059,6 +1061,7 @@ void AC_PosControl::update_U_controller()
     } else {
         _limit_vector.z = 0.0f;
     }
+    
 }
 
 
@@ -1077,6 +1080,7 @@ float AC_PosControl::get_lean_angle_max_cd() const
     }
     return _lean_angle_max_deg * 100.0f;
 }
+
 
 /// set the desired position, velocity and acceleration targets
 void AC_PosControl::set_pos_vel_accel_NEU_cm(const Vector3p& pos_neu_cm, const Vector3f& vel_neu_cms, const Vector3f& accel_neu_cmss)

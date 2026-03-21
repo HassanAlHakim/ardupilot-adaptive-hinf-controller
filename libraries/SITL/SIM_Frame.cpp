@@ -602,9 +602,13 @@ void Frame::init(const char *frame_str, Battery *_battery)
 
     if (is_zero(model.moment_of_inertia.x) || is_zero(model.moment_of_inertia.y) || is_zero(model.moment_of_inertia.z)) {
         // if no inertia provided, assume 50% of mass on ring around center
-        model.moment_of_inertia.x = model.mass * 0.25 * sq(model.diagonal_size*0.5);
-        model.moment_of_inertia.y = model.moment_of_inertia.x;
-        model.moment_of_inertia.z = model.mass * 0.5 * sq(model.diagonal_size*0.5);
+        // model.moment_of_inertia.x = model.mass * 0.25 * sq(model.diagonal_size*0.5);
+        // model.moment_of_inertia.y = model.moment_of_inertia.x;
+        // model.moment_of_inertia.z = model.mass * 0.5 * sq(model.diagonal_size*0.5);
+
+        model.moment_of_inertia.x = 0.92;
+        model.moment_of_inertia.y = 0.93;
+        model.moment_of_inertia.z = 1.175;
     }
 
     // setup reasonable defaults for battery

@@ -19,3 +19,9 @@
 #ifndef AP_CUSTOMCONTROL_PID_ENABLED
 #define AP_CUSTOMCONTROL_PID_ENABLED AP_CUSTOMCONTROL_BACKEND_DEFAULT_ENABLED
 #endif
+
+
+// I added this (Hassan)
+#ifndef AP_CUSTOMCONTROL_XYZ_ENABLED
+#define AP_CUSTOMCONTROL_XYZ_ENABLED 1   // or 0 if you want it off by default
+#endif

@@ -294,6 +294,8 @@ public:
     /// get_pos_error_U_cm - returns altitude error in cm
     float get_pos_error_U_cm() const { return _p_pos_u.get_error(); }
 
+    // get the last commanded thrust normalized
+    float get_thrust_commanded() const {return _last_thrust_cmd;}
 
     /// Velocity
 
@@ -568,6 +570,7 @@ protected:
     float    _pos_terrain_u_cm;           // position terrain in cm from the EKF origin in NEU frame.  this terrain moves towards _pos_terrain_target_u_cm
     float    _vel_terrain_u_cms;          // velocity terrain in NEU cm/s calculated by pos_to_rate step.  this terrain moves towards _vel_terrain_target
     float    _accel_terrain_u_cmss;       // acceleration terrain in NEU cm/s/s
+    float    _last_thrust_cmd = 0.0f;     // have the last commanded thrust asked by the altitude controller
 
     // offset handling variables
     Vector3p    _pos_offset_target_neu_cm;      // position offset target in cm relative to the EKF origin in NEU frame
