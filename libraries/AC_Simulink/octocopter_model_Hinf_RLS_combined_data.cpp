@@ -18,6 +18,8 @@
 //
 #include "octocopter_model_Hinf_RLS_combined.h"
 
+// model 7
+
 // Block parameters (default storage)
 octocopter_model_Hinf_RLS_combined::P_octocopter_model_Hinf_RLS_c_T
   octocopter_model_Hinf_RLS_combined::octocopter_model_Hinf_RLS_com_P{
