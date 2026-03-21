@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'octocopter_model_Hinf_RLS_combined'.
 //
-// Model version                  : 16.130
+// Model version                  : 16.132
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Sun Mar 15 22:53:41 2026
+// C/C++ source code generated on : Sat Mar 21 20:30:24 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -32,7 +32,7 @@ void octocopter_model_Hinf_RLS_combined::octocopter_model_MATLABFunction
 {
   real32_T Ts;
   real32_T alpha;
-  if ((!localDW->x_prev_not_empty) || (rtu_reset > 0.0)) {
+  if ((!localDW->x_prev_not_empty) || (rtu_reset != 0.0)) {
     localDW->x_prev = rtu_x;
     localDW->x_prev_not_empty = true;
     localDW->xdot_prev = 0.0F;
@@ -239,8 +239,7 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
     rtb_Subtract2 = octocopter_model_Hinf_RLS_co_DW.Delay4_DSTATE;
   }
 
-  // Saturate: '<S1>/Saturation2' incorporates:
-  //   MATLAB Function: '<S21>/MATLAB Function'
+  // MATLAB Function: '<S21>/MATLAB Function' incorporates:
   //   Switch: '<S21>/Switch'
   //   Switch: '<S21>/Switch1'
   //   Switch: '<S21>/Switch2'
@@ -248,18 +247,6 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   *arg_tau_x = ((static_cast<real32_T>(-rtb_Switch3) * rtb_DigitalFilter *
                  rtb_DigitalFilter_d + rtb_DiscreteStateSpace[0]) + static_cast<
                 real32_T>(rtb_Subtract2)) * static_cast<real32_T>(1.0 / tmp);
-
-  // Saturate: '<S1>/Saturation2'
-  if (*arg_tau_x > octocopter_model_Hinf_RLS_com_P.Saturation2_UpperSat) {
-    // Saturate: '<S1>/Saturation2'
-    *arg_tau_x = octocopter_model_Hinf_RLS_com_P.Saturation2_UpperSat;
-  } else if (*arg_tau_x < octocopter_model_Hinf_RLS_com_P.Saturation2_LowerSat)
-  {
-    // Saturate: '<S1>/Saturation2'
-    *arg_tau_x = octocopter_model_Hinf_RLS_com_P.Saturation2_LowerSat;
-  }
-
-  // End of Saturate: '<S1>/Saturation2'
 
   // S-Function (sdspbiquad): '<S5>/Digital Filter' incorporates:
   //   Inport: '<Root>/p'
@@ -336,25 +323,12 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
     tmp = octocopter_model_Hinf_RLS_co_DW.Delay6_DSTATE;
   }
 
-  // Saturate: '<S1>/Saturation1' incorporates:
-  //   MATLAB Function: '<S21>/MATLAB Function1'
+  // MATLAB Function: '<S21>/MATLAB Function1' incorporates:
   //   Switch: '<S21>/Switch5'
 
   *arg_tau_y = ((static_cast<real32_T>(-rtb_Switch4) * rtb_DigitalFilter_lt *
                  rtb_DigitalFilter_d + rtb_DiscreteStateSpace[1]) - static_cast<
                 real32_T>(tmp)) * static_cast<real32_T>(1.0 / rtb_Switch3);
-
-  // Saturate: '<S1>/Saturation1'
-  if (*arg_tau_y > octocopter_model_Hinf_RLS_com_P.Saturation1_UpperSat) {
-    // Saturate: '<S1>/Saturation1'
-    *arg_tau_y = octocopter_model_Hinf_RLS_com_P.Saturation1_UpperSat;
-  } else if (*arg_tau_y < octocopter_model_Hinf_RLS_com_P.Saturation1_LowerSat)
-  {
-    // Saturate: '<S1>/Saturation1'
-    *arg_tau_y = octocopter_model_Hinf_RLS_com_P.Saturation1_LowerSat;
-  }
-
-  // End of Saturate: '<S1>/Saturation1'
 
   // Switch: '<S21>/Switch6' incorporates:
   //   Constant: '<S21>/Constant6'
@@ -388,8 +362,7 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
     rtb_Subtract2 = octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE;
   }
 
-  // Saturate: '<S1>/Saturation' incorporates:
-  //   MATLAB Function: '<S21>/MATLAB Function2'
+  // MATLAB Function: '<S21>/MATLAB Function2' incorporates:
   //   Switch: '<S21>/Switch6'
   //   Switch: '<S21>/Switch7'
   //   Switch: '<S21>/Switch8'
@@ -398,17 +371,6 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
                  rtb_DigitalFilter_lt + rtb_DiscreteStateSpace[2]) -
                 static_cast<real32_T>(rtb_Subtract2)) * static_cast<real32_T>
     (1.0 / tmp);
-
-  // Saturate: '<S1>/Saturation'
-  if (*arg_tau_z > octocopter_model_Hinf_RLS_com_P.Saturation_UpperSat) {
-    // Saturate: '<S1>/Saturation'
-    *arg_tau_z = octocopter_model_Hinf_RLS_com_P.Saturation_UpperSat;
-  } else if (*arg_tau_z < octocopter_model_Hinf_RLS_com_P.Saturation_LowerSat) {
-    // Saturate: '<S1>/Saturation'
-    *arg_tau_z = octocopter_model_Hinf_RLS_com_P.Saturation_LowerSat;
-  }
-
-  // End of Saturate: '<S1>/Saturation'
 
   // S-Function (sdspbiquad): '<S8>/Digital Filter' incorporates:
   //   Delay: '<S1>/Delay9'

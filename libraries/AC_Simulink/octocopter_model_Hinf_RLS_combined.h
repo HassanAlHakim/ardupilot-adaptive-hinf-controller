@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'octocopter_model_Hinf_RLS_combined'.
 //
-// Model version                  : 16.130
+// Model version                  : 16.132
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Sun Mar 15 22:53:41 2026
+// C/C++ source code generated on : Sat Mar 21 20:30:24 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -246,12 +246,6 @@ class octocopter_model_Hinf_RLS_combined final
                                   // Computed Parameter: Delay4_InitialCondition
                                      //  Referenced by: '<S21>/Delay4'
 
-    real32_T Saturation2_UpperSat;   // Computed Parameter: Saturation2_UpperSat
-                                        //  Referenced by: '<S1>/Saturation2'
-
-    real32_T Saturation2_LowerSat;   // Computed Parameter: Saturation2_LowerSat
-                                        //  Referenced by: '<S1>/Saturation2'
-
     real32_T Delay3_InitialCondition;
                                   // Computed Parameter: Delay3_InitialCondition
                                      //  Referenced by: '<S21>/Delay3'
@@ -264,12 +258,6 @@ class octocopter_model_Hinf_RLS_combined final
                                   // Computed Parameter: Delay6_InitialCondition
                                      //  Referenced by: '<S21>/Delay6'
 
-    real32_T Saturation1_UpperSat;   // Computed Parameter: Saturation1_UpperSat
-                                        //  Referenced by: '<S1>/Saturation1'
-
-    real32_T Saturation1_LowerSat;   // Computed Parameter: Saturation1_LowerSat
-                                        //  Referenced by: '<S1>/Saturation1'
-
     real32_T Delay7_InitialCondition;
                                   // Computed Parameter: Delay7_InitialCondition
                                      //  Referenced by: '<S21>/Delay7'
@@ -281,12 +269,6 @@ class octocopter_model_Hinf_RLS_combined final
     real32_T Delay8_InitialCondition;
                                   // Computed Parameter: Delay8_InitialCondition
                                      //  Referenced by: '<S21>/Delay8'
-
-    real32_T Saturation_UpperSat;     // Computed Parameter: Saturation_UpperSat
-                                         //  Referenced by: '<S1>/Saturation'
-
-    real32_T Saturation_LowerSat;     // Computed Parameter: Saturation_LowerSat
-                                         //  Referenced by: '<S1>/Saturation'
 
     real32_T Delay9_InitialCondition_o;
                                 // Computed Parameter: Delay9_InitialCondition_o

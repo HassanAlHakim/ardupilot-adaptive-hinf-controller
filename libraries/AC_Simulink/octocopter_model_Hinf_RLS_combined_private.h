@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'octocopter_model_Hinf_RLS_combined'.
 //
-// Model version                  : 16.130
+// Model version                  : 16.132
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Sun Mar 15 22:53:41 2026
+// C/C++ source code generated on : Sat Mar 21 20:30:24 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex-M
