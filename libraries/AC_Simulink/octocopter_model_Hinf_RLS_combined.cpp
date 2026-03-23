@@ -32,7 +32,7 @@ void octocopter_model_Hinf_RLS_combined::octocopter_model_MATLABFunction
 {
   real32_T Ts;
   real32_T alpha;
-  if ((!localDW->x_prev_not_empty) || (rtu_reset != 0.0)) {
+  if ((!localDW->x_prev_not_empty) || (rtu_reset > 0.0)) {
     localDW->x_prev = rtu_x;
     localDW->x_prev_not_empty = true;
     localDW->xdot_prev = 0.0F;
