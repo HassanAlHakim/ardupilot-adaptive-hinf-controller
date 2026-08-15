@@ -21,6 +21,7 @@
 #include <AP_Baro/AP_Baro.h>
 #include <AP_Filesystem/AP_Filesystem.h>
 #include "SIM_Aircraft.h"
+#include <AP_Logger/AP_Logger.h>
 
 #include "SIM_config.h"
 
@@ -606,9 +607,9 @@ void Frame::init(const char *frame_str, Battery *_battery)
         // model.moment_of_inertia.y = model.moment_of_inertia.x;
         // model.moment_of_inertia.z = model.mass * 0.5 * sq(model.diagonal_size*0.5);
 
-        model.moment_of_inertia.x = 0.92;
-        model.moment_of_inertia.y = 0.93;
-        model.moment_of_inertia.z = 1.175;
+        model.moment_of_inertia.x = 0.92*1.3;
+        model.moment_of_inertia.y = 0.93*1.2;
+        model.moment_of_inertia.z = 1.175*0.7;
     }
 
     // setup reasonable defaults for battery
@@ -660,6 +661,12 @@ void Frame::calculate_forces(const Aircraft &aircraft,
             rpm[motor_offset+i] = motors[i].get_command() * AP::sitl()->vibe_motor * 60.0f;
         }
     }
+
+    // log actual body-frame torques in N·m reaching the rigid body
+    AP::logger().Write_STRQ(torque.x, -1*torque.y, -1*torque.z);
+
+    // expose same values in shared SITL state so the flight controller can read them
+    AP::sitl()->state.body_torque_strq = Vector3f(torque.x, -1.0f*torque.y, -1.0f*torque.z);
 
     // calculate total rotational acceleration
     rot_accel.x = torque.x / model.moment_of_inertia.x;

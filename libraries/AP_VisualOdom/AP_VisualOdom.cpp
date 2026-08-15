@@ -138,7 +138,9 @@ void AP_VisualOdom::init()
         break;
 #if AP_VISUALODOM_MAV_ENABLED
     case VisualOdom_Type::MAV:
+        hal.console->printf("VisualOdom: attempting MAV backend allocation\n");
         _driver = NEW_NOTHROW AP_VisualOdom_MAV(*this);
+        hal.console->printf("VisualOdom: MAV backend allocated: %s\n", _driver ? "YES" : "NO");
         break;
 #endif
 #if AP_VISUALODOM_INTELT265_ENABLED

@@ -655,12 +655,29 @@ struct PACKED log_HRLS {
     float tau_z;    
 };
 
-struct PACKED log_ORLS {  
-    LOG_PACKET_HEADER;  
-    uint64_t time_us;  
+struct PACKED log_ORLS {
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
     float inverse_Ix_hat;
     float inverse_Iy_hat;
-    float inverse_Iz_hat;   
+    float inverse_Iz_hat;
+};
+
+struct PACKED log_STRQ {
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    float torque_x;   // roll  torque reaching rigid body [N·m]
+    float torque_y;   // pitch torque reaching rigid body [N·m]
+    float torque_z;   // yaw   torque reaching rigid body [N·m]
+};
+
+struct PACKED log_RTAU {
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    float tau_x;    // roll torque reconstructed from commanded ESC PWM [N.m]
+    float tau_y;    // pitch torque reconstructed from commanded ESC PWM [N.m]
+    float tau_z;    // yaw torque reconstructed from commanded ESC PWM [N.m]
+    float f_total;  // total collective thrust reconstructed from commanded ESC PWM [N]
 };
 
 struct PACKED log_VER {
@@ -1205,6 +1222,10 @@ LOG_STRUCTURE_FROM_GPS \
       "HRLS", "Qfffffffff", "TimeUS,eR,eP,eY,p,q,r,tx,ty,tz", "s---------", "F000000000", true }, \
     { LOG_ORLS_MSG, sizeof(log_ORLS), \
       "ORLS", "Qfff", "TimeUS,iIx,iIy,iIz", "s---", "F000", true }, \
+    { LOG_STRQ_MSG, sizeof(log_STRQ), \
+      "STRQ", "Qfff", "TimeUS,TorX,TorY,TorZ", "sttt", "F000", true }, \
+    { LOG_RTAU_MSG, sizeof(log_RTAU), \
+      "RTAU", "Qffff", "TimeUS,TauX,TauY,TauZ,Ftot", "s----", "F0000", true }, \
     { LOG_RCOUT2_MSG, sizeof(log_RCOUT2), \
       "RCO2",  "QHHHH",     "TimeUS,C15,C16,C17,C18", "sYYYY", "F----", true  }, \
     { LOG_RCOUT3_MSG, sizeof(log_RCOUT), \
@@ -1396,6 +1417,8 @@ enum LogMessages : uint8_t {
     LOG_MIXI_MSG,
     LOG_HRLS_MSG,
     LOG_ORLS_MSG,
+    LOG_STRQ_MSG,
+    LOG_RTAU_MSG,
     _LOG_LAST_MSG_
      
     // log_Mix

@@ -221,6 +221,8 @@ public:
     void Write_HRLS(float e_phi, float e_theta, float e_psi, float p, float q, float r, float tau_x, float tau_y, float tau_z);
 
     void Write_ORLS(float inverse_Ix_hat,float inverse_Iy_hat,float inverse_Iz_hat);
+    void Write_STRQ(float torque_x, float torque_y, float torque_z);
+    void Write_RTAU(float tau_x, float tau_y, float tau_z, float f_total);
 
     // erase handling
     void EraseAll();

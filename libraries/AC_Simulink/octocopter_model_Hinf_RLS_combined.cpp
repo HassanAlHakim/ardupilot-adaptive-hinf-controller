@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'octocopter_model_Hinf_RLS_combined'.
 //
-// Model version                  : 16.132
+// Model version                  : 16.134
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Mon Mar 23 17:44:45 2026
+// C/C++ source code generated on : Thu Apr 16 17:30:47 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -53,13 +53,14 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   real32_T *arg_theta, real32_T *arg_q, real32_T *arg_theta_des, real32_T *arg_p,
   real32_T *arg_phi, real32_T *arg_psi, real32_T *arg_phi_des, real32_T
   *arg_inverse_Ix_hat, real32_T *arg_inverse_Iy_hat, real32_T
-  *arg_inverse_Iz_hat)
+  *arg_inverse_Iz_hat, real_T *arg_real_tau_x, real_T *arg_real_tau_y, real_T
+  *arg_real_tau_z)
 {
-  real_T rtb_Subtract2;
-  real_T rtb_Subtract2_tmp;
+  real_T denAccum;
+  real_T rtb_Delay11;
+  real_T rtb_Delay11_tmp;
   real_T rtb_Switch3;
   real_T rtb_Switch4;
-  real_T tmp;
   int_T i;
   int_T j;
   real32_T xnew[11];
@@ -68,14 +69,17 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   real32_T K_phi[3];
   real32_T K_psi[3];
   real32_T rtb_DiscreteStateSpace[3];
-  real32_T Ix;
+  real32_T Iy;
   real32_T Iz;
   real32_T K_phi_0;
-  real32_T rtb_DigitalFilter;
+  real32_T TmpSignalConversionAtDiscreteSt;
+  real32_T rtb_DigitalFilter_bs;
   real32_T rtb_DigitalFilter_d;
-  real32_T rtb_DigitalFilter_lt;
-  real32_T rtb_DigitalFilter_p;
+  real32_T rtb_DigitalFilter_j;
+  real32_T rtb_DigitalFilter_n;
+  real32_T rtb_DigitalFilter_o;
   real32_T rtb_DiscreteStateSpace_0;
+  real32_T rtb_xdot;
   int8_T b_I[9];
   static const int8_T c[9]{ 20, 0, 0, 0, 20, 0, 0, 0, 20 };
 
@@ -88,72 +92,64 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   //   Inport: '<Root>/phi_des'
   //   Sum: '<S1>/Add1'
 
-  Ix = ((*arg_phi_des - *arg_phi) * 0.00554271741F - -1.77863181F *
-        octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES[0]) -
-    0.800802648F * octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES[1];
-
-  // S-Function (sdspbiquad): '<S2>/Digital Filter'
-  *arg_inverse_Ix_hat = (2.0F *
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES[0] + Ix) +
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES[1];
-
-  // S-Function (sdspbiquad): '<S2>/Digital Filter'
-  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES[1] =
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES[0];
-  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES[0] = Ix;
+  Iy = ((*arg_phi_des - *arg_phi) * 0.00554271741F - -1.77863181F *
+        octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_k[0]) -
+    0.800802648F * octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_k[1];
+  rtb_DigitalFilter_j = (2.0F *
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_k[0] + Iy) +
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_k[1];
+  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_k[1] =
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_k[0];
+  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_k[0] = Iy;
 
   // S-Function (sdspbiquad): '<S3>/Digital Filter' incorporates:
   //   Inport: '<Root>/theta'
   //   Inport: '<Root>/theta_des'
   //   Sum: '<S1>/Add2'
 
-  Ix = ((*arg_theta_des - *arg_theta) * 0.00554271741F - -1.77863181F *
+  Iy = ((*arg_theta_des - *arg_theta) * 0.00554271741F - -1.77863181F *
         octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_f[0]) -
     0.800802648F * octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_f[1];
-
-  // S-Function (sdspbiquad): '<S3>/Digital Filter'
-  *arg_inverse_Iy_hat = (2.0F *
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_f[0] + Ix) +
+  rtb_DigitalFilter_bs = (2.0F *
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_f[0] + Iy) +
     octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_f[1];
-
-  // S-Function (sdspbiquad): '<S3>/Digital Filter'
   octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_f[1] =
     octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_f[0];
-  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_f[0] = Ix;
+  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_f[0] = Iy;
 
   // S-Function (sdspbiquad): '<S4>/Digital Filter' incorporates:
   //   Inport: '<Root>/psi'
   //   Inport: '<Root>/psi_des'
   //   Sum: '<S1>/Add3'
 
-  Ix = ((*arg_psi_des - *arg_psi) * 0.00554271741F - -1.77863181F *
+  Iy = ((*arg_psi_des - *arg_psi) * 0.00554271741F - -1.77863181F *
         octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_m[0]) -
     0.800802648F * octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_m[1];
-
-  // S-Function (sdspbiquad): '<S4>/Digital Filter'
-  *arg_inverse_Iz_hat = (2.0F *
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_m[0] + Ix) +
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_m[1];
-
-  // S-Function (sdspbiquad): '<S4>/Digital Filter'
+  rtb_xdot = (2.0F *
+              octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_m[0] +
+              Iy) + octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_m
+    [1];
   octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_m[1] =
     octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_m[0];
-  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_m[0] = Ix;
+  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_m[0] = Iy;
+
+  // SignalConversion generated from: '<S1>/Discrete State-Space'
+  TmpSignalConversionAtDiscreteSt = rtb_xdot;
 
   // DiscreteStateSpace: '<S1>/Discrete State-Space' incorporates:
   //   SignalConversion generated from: '<S1>/Discrete State-Space'
 
   for (i = 0; i < 3; i++) {
-    Ix = 0.0F;
+    Iy = 0.0F;
     for (j = 0; j < 11; j++) {
-      Ix += octocopter_model_Hinf_RLS_com_P.C_KR[3 * j + i] *
+      Iy += octocopter_model_Hinf_RLS_com_P.C_KR[3 * j + i] *
         octocopter_model_Hinf_RLS_co_DW.DiscreteStateSpace_DSTATE[j];
     }
 
     rtb_DiscreteStateSpace[i] = ((octocopter_model_Hinf_RLS_com_P.D_KR[i] *
-      *arg_inverse_Ix_hat + Ix) + octocopter_model_Hinf_RLS_com_P.D_KR[i + 3] * *
-      arg_inverse_Iy_hat) + octocopter_model_Hinf_RLS_com_P.D_KR[i + 6] *
-      *arg_inverse_Iz_hat;
+      rtb_DigitalFilter_j + Iy) + octocopter_model_Hinf_RLS_com_P.D_KR[i + 3] *
+      rtb_DigitalFilter_bs) + octocopter_model_Hinf_RLS_com_P.D_KR[i + 6] *
+      rtb_xdot;
   }
 
   // End of DiscreteStateSpace: '<S1>/Discrete State-Space'
@@ -165,63 +161,62 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   //   Step: '<S21>/Step1'
   //   Step: '<S21>/Step2'
 
-  rtb_Subtract2_tmp = (((&octocopter_model_Hinf_RLS_co_M)->Timing.clockTick0) *
-                       0.0025);
-  if (rtb_Subtract2_tmp < octocopter_model_Hinf_RLS_com_P.twait_RLS) {
-    tmp = octocopter_model_Hinf_RLS_com_P.Step4_Y0;
+  rtb_Delay11_tmp = (((&octocopter_model_Hinf_RLS_co_M)->Timing.clockTick0) *
+                     0.0025);
+  if (rtb_Delay11_tmp < octocopter_model_Hinf_RLS_com_P.twait_RLS) {
+    denAccum = octocopter_model_Hinf_RLS_com_P.Step4_Y0;
   } else {
-    tmp = octocopter_model_Hinf_RLS_com_P.Step4_YFinal;
+    denAccum = octocopter_model_Hinf_RLS_com_P.Step4_YFinal;
   }
 
   // Sum: '<S21>/Subtract1' incorporates:
   //   Constant: '<S21>/Constant10'
   //   Step: '<S21>/Step4'
 
-  rtb_Subtract2 = octocopter_model_Hinf_RLS_com_P.Constant10_Value - tmp;
+  rtb_Delay11 = octocopter_model_Hinf_RLS_com_P.Constant10_Value - denAccum;
 
   // S-Function (sdspbiquad): '<S6>/Digital Filter' incorporates:
   //   Inport: '<Root>/q'
 
-  Ix = (0.00554271741F * *arg_q - -1.77863181F *
+  Iy = (0.00554271741F * *arg_q - -1.77863181F *
         octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_e[0]) -
     0.800802648F * octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_e[1];
-  rtb_DigitalFilter = (2.0F *
-                       octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_e
-                       [0] + Ix) +
+  rtb_DigitalFilter_o = (2.0F *
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_e[0] + Iy) +
     octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_e[1];
   octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_e[1] =
     octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_e[0];
-  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_e[0] = Ix;
+  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_e[0] = Iy;
 
   // S-Function (sdspbiquad): '<S7>/Digital Filter' incorporates:
   //   Inport: '<Root>/r'
 
-  Ix = (0.00554271741F * *arg_r - -1.77863181F *
+  Iy = (0.00554271741F * *arg_r - -1.77863181F *
         octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_mm[0]) -
     0.800802648F * octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_mm
     [1];
-  rtb_DigitalFilter_d = (2.0F *
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_mm[0] + Ix) +
+  rtb_DigitalFilter_n = (2.0F *
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_mm[0] + Iy) +
     octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_mm[1];
   octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_mm[1] =
     octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_mm[0];
-  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_mm[0] = Ix;
+  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_mm[0] = Iy;
 
   // Switch: '<S21>/Switch' incorporates:
   //   Constant: '<S21>/Constant'
   //   Delay: '<S21>/Delay1'
 
-  if (rtb_Subtract2 > octocopter_model_Hinf_RLS_com_P.Switch_Threshold) {
-    tmp = 1.0 / octocopter_model_Hinf_RLS_com_P.Ixx_m;
+  if (rtb_Delay11 > octocopter_model_Hinf_RLS_com_P.Switch_Threshold) {
+    denAccum = 1.0 / octocopter_model_Hinf_RLS_com_P.Ixx_m;
   } else {
-    tmp = octocopter_model_Hinf_RLS_co_DW.Delay1_DSTATE;
+    denAccum = octocopter_model_Hinf_RLS_co_DW.Delay1_DSTATE;
   }
 
   // Switch: '<S21>/Switch1' incorporates:
   //   Constant: '<S21>/Constant1'
   //   Delay: '<S21>/Delay2'
 
-  if (rtb_Subtract2 > octocopter_model_Hinf_RLS_com_P.Switch1_Threshold) {
+  if (rtb_Delay11 > octocopter_model_Hinf_RLS_com_P.Switch1_Threshold) {
     rtb_Switch3 = (-octocopter_model_Hinf_RLS_com_P.Izz_m +
                    octocopter_model_Hinf_RLS_com_P.Iyy_m) /
       octocopter_model_Hinf_RLS_com_P.Ixx_m;
@@ -233,52 +228,54 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   //   Constant: '<S21>/Constant2'
   //   Delay: '<S21>/Delay4'
 
-  if (rtb_Subtract2 > octocopter_model_Hinf_RLS_com_P.Switch2_Threshold) {
-    rtb_Subtract2 = octocopter_model_Hinf_RLS_com_P.Constant2_Value;
+  if (rtb_Delay11 > octocopter_model_Hinf_RLS_com_P.Switch2_Threshold) {
+    rtb_Delay11 = octocopter_model_Hinf_RLS_com_P.Constant2_Value;
   } else {
-    rtb_Subtract2 = octocopter_model_Hinf_RLS_co_DW.Delay4_DSTATE;
+    rtb_Delay11 = octocopter_model_Hinf_RLS_co_DW.Delay4_DSTATE;
   }
 
-  // MATLAB Function: '<S21>/MATLAB Function' incorporates:
+  // Outport: '<Root>/tau_x' incorporates:
+  //   MATLAB Function: '<S21>/MATLAB Function'
   //   Switch: '<S21>/Switch'
   //   Switch: '<S21>/Switch1'
   //   Switch: '<S21>/Switch2'
 
-  *arg_tau_x = ((static_cast<real32_T>(-rtb_Switch3) * rtb_DigitalFilter *
-                 rtb_DigitalFilter_d + rtb_DiscreteStateSpace[0]) + static_cast<
-                real32_T>(rtb_Subtract2)) * static_cast<real32_T>(1.0 / tmp);
+  *arg_tau_x = ((static_cast<real32_T>(-rtb_Switch3) * rtb_DigitalFilter_o *
+                 rtb_DigitalFilter_n + rtb_DiscreteStateSpace[0]) + static_cast<
+                real32_T>(rtb_Delay11)) * static_cast<real32_T>(1.0 / denAccum);
 
   // S-Function (sdspbiquad): '<S5>/Digital Filter' incorporates:
   //   Inport: '<Root>/p'
 
-  Ix = (0.00554271741F * *arg_p - -1.77863181F *
-        octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_l[0]) -
-    0.800802648F * octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_l[1];
-  rtb_DigitalFilter_lt = (2.0F *
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_l[0] + Ix) +
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_l[1];
-  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_l[1] =
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_l[0];
-  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_l[0] = Ix;
+  Iy = (0.00554271741F * *arg_p - -1.77863181F *
+        octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_lh[0]) -
+    0.800802648F * octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_lh
+    [1];
+  rtb_DigitalFilter_d = (2.0F *
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_lh[0] + Iy) +
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_lh[1];
+  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_lh[1] =
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_lh[0];
+  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_lh[0] = Iy;
 
   // Step: '<S21>/Step1'
-  if (rtb_Subtract2_tmp < octocopter_model_Hinf_RLS_com_P.twait_RLS) {
-    tmp = octocopter_model_Hinf_RLS_com_P.Step1_Y0;
+  if (rtb_Delay11_tmp < octocopter_model_Hinf_RLS_com_P.twait_RLS) {
+    denAccum = octocopter_model_Hinf_RLS_com_P.Step1_Y0;
   } else {
-    tmp = octocopter_model_Hinf_RLS_com_P.Step1_YFinal;
+    denAccum = octocopter_model_Hinf_RLS_com_P.Step1_YFinal;
   }
 
   // Sum: '<S21>/Subtract' incorporates:
   //   Constant: '<S21>/Constant9'
   //   Step: '<S21>/Step1'
 
-  rtb_Subtract2 = octocopter_model_Hinf_RLS_com_P.Constant9_Value - tmp;
+  rtb_Delay11 = octocopter_model_Hinf_RLS_com_P.Constant9_Value - denAccum;
 
   // Switch: '<S21>/Switch3' incorporates:
   //   Constant: '<S21>/Constant3'
   //   Delay: '<S21>/Delay3'
 
-  if (rtb_Subtract2 > octocopter_model_Hinf_RLS_com_P.Switch3_Threshold) {
+  if (rtb_Delay11 > octocopter_model_Hinf_RLS_com_P.Switch3_Threshold) {
     rtb_Switch3 = 1.0 / octocopter_model_Hinf_RLS_com_P.Iyy_m;
   } else {
     rtb_Switch3 = octocopter_model_Hinf_RLS_co_DW.Delay3_DSTATE;
@@ -290,7 +287,7 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   //   Constant: '<S21>/Constant4'
   //   Delay: '<S21>/Delay5'
 
-  if (rtb_Subtract2 > octocopter_model_Hinf_RLS_com_P.Switch4_Threshold) {
+  if (rtb_Delay11 > octocopter_model_Hinf_RLS_com_P.Switch4_Threshold) {
     rtb_Switch4 = (octocopter_model_Hinf_RLS_com_P.Izz_m -
                    octocopter_model_Hinf_RLS_com_P.Ixx_m) /
       octocopter_model_Hinf_RLS_com_P.Iyy_m;
@@ -301,50 +298,51 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   // End of Switch: '<S21>/Switch4'
 
   // Step: '<S21>/Step2'
-  if (rtb_Subtract2_tmp < octocopter_model_Hinf_RLS_com_P.twait_RLS) {
-    tmp = octocopter_model_Hinf_RLS_com_P.Step2_Y0;
+  if (rtb_Delay11_tmp < octocopter_model_Hinf_RLS_com_P.twait_RLS) {
+    denAccum = octocopter_model_Hinf_RLS_com_P.Step2_Y0;
   } else {
-    tmp = octocopter_model_Hinf_RLS_com_P.Step2_YFinal;
+    denAccum = octocopter_model_Hinf_RLS_com_P.Step2_YFinal;
   }
 
   // Sum: '<S21>/Subtract2' incorporates:
   //   Constant: '<S21>/Constant11'
   //   Step: '<S21>/Step2'
 
-  rtb_Subtract2 = octocopter_model_Hinf_RLS_com_P.Constant11_Value - tmp;
+  rtb_Delay11 = octocopter_model_Hinf_RLS_com_P.Constant11_Value - denAccum;
 
   // Switch: '<S21>/Switch5' incorporates:
   //   Constant: '<S21>/Constant5'
   //   Delay: '<S21>/Delay6'
 
-  if (rtb_Subtract2 > octocopter_model_Hinf_RLS_com_P.Switch5_Threshold) {
-    tmp = octocopter_model_Hinf_RLS_com_P.Constant5_Value;
+  if (rtb_Delay11 > octocopter_model_Hinf_RLS_com_P.Switch5_Threshold) {
+    denAccum = octocopter_model_Hinf_RLS_com_P.Constant5_Value;
   } else {
-    tmp = octocopter_model_Hinf_RLS_co_DW.Delay6_DSTATE;
+    denAccum = octocopter_model_Hinf_RLS_co_DW.Delay6_DSTATE;
   }
 
-  // MATLAB Function: '<S21>/MATLAB Function1' incorporates:
+  // Outport: '<Root>/tau_y' incorporates:
+  //   MATLAB Function: '<S21>/MATLAB Function1'
   //   Switch: '<S21>/Switch5'
 
-  *arg_tau_y = ((static_cast<real32_T>(-rtb_Switch4) * rtb_DigitalFilter_lt *
-                 rtb_DigitalFilter_d + rtb_DiscreteStateSpace[1]) - static_cast<
-                real32_T>(tmp)) * static_cast<real32_T>(1.0 / rtb_Switch3);
+  *arg_tau_y = ((static_cast<real32_T>(-rtb_Switch4) * rtb_DigitalFilter_d *
+                 rtb_DigitalFilter_n + rtb_DiscreteStateSpace[1]) - static_cast<
+                real32_T>(denAccum)) * static_cast<real32_T>(1.0 / rtb_Switch3);
 
   // Switch: '<S21>/Switch6' incorporates:
   //   Constant: '<S21>/Constant6'
   //   Delay: '<S21>/Delay8'
 
-  if (rtb_Subtract2 > octocopter_model_Hinf_RLS_com_P.Switch6_Threshold) {
-    tmp = 1.0 / octocopter_model_Hinf_RLS_com_P.Izz_m;
+  if (rtb_Delay11 > octocopter_model_Hinf_RLS_com_P.Switch6_Threshold) {
+    denAccum = 1.0 / octocopter_model_Hinf_RLS_com_P.Izz_m;
   } else {
-    tmp = octocopter_model_Hinf_RLS_co_DW.Delay8_DSTATE;
+    denAccum = octocopter_model_Hinf_RLS_co_DW.Delay8_DSTATE;
   }
 
   // Switch: '<S21>/Switch8' incorporates:
   //   Constant: '<S21>/Constant8'
   //   Delay: '<S21>/Delay7'
 
-  if (rtb_Subtract2 > octocopter_model_Hinf_RLS_com_P.Switch8_Threshold) {
+  if (rtb_Delay11 > octocopter_model_Hinf_RLS_com_P.Switch8_Threshold) {
     rtb_Switch3 = (octocopter_model_Hinf_RLS_com_P.Ixx_m -
                    octocopter_model_Hinf_RLS_com_P.Iyy_m) /
       octocopter_model_Hinf_RLS_com_P.Izz_m;
@@ -356,61 +354,62 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   //   Constant: '<S21>/Constant7'
   //   Delay: '<S21>/Delay9'
 
-  if (rtb_Subtract2 > octocopter_model_Hinf_RLS_com_P.Switch7_Threshold) {
-    rtb_Subtract2 = octocopter_model_Hinf_RLS_com_P.Constant7_Value;
+  if (rtb_Delay11 > octocopter_model_Hinf_RLS_com_P.Switch7_Threshold) {
+    rtb_Delay11 = octocopter_model_Hinf_RLS_com_P.Constant7_Value;
   } else {
-    rtb_Subtract2 = octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE;
+    rtb_Delay11 = octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_o;
   }
 
-  // MATLAB Function: '<S21>/MATLAB Function2' incorporates:
+  // Outport: '<Root>/tau_z' incorporates:
+  //   MATLAB Function: '<S21>/MATLAB Function2'
   //   Switch: '<S21>/Switch6'
   //   Switch: '<S21>/Switch7'
   //   Switch: '<S21>/Switch8'
 
-  *arg_tau_z = ((static_cast<real32_T>(-rtb_Switch3) * rtb_DigitalFilter *
-                 rtb_DigitalFilter_lt + rtb_DiscreteStateSpace[2]) -
-                static_cast<real32_T>(rtb_Subtract2)) * static_cast<real32_T>
-    (1.0 / tmp);
+  *arg_tau_z = ((static_cast<real32_T>(-rtb_Switch3) * rtb_DigitalFilter_o *
+                 rtb_DigitalFilter_d + rtb_DiscreteStateSpace[2]) -
+                static_cast<real32_T>(rtb_Delay11)) * static_cast<real32_T>(1.0 /
+    denAccum);
 
   // S-Function (sdspbiquad): '<S8>/Digital Filter' incorporates:
   //   Delay: '<S1>/Delay9'
 
-  Ix = (0.00554271741F * octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a -
-        -1.77863181F *
-        octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_a[0]) -
-    0.800802648F * octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_a[1];
-  rtb_DigitalFilter_p = (2.0F *
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_a[0] + Ix) +
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_a[1];
-  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_a[1] =
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_a[0];
-  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_a[0] = Ix;
+  denAccum = (0.0055427172102806817 *
+              octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE -
+              -1.7786317778245848 *
+              octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES[0]) -
+    0.80080264666570755 *
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES[1];
+  rtb_Delay11 = (2.0 *
+                 octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES[0] +
+                 denAccum) +
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES[1];
+  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES[1] =
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES[0];
+  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES[0] = denAccum;
 
   // Step: '<S1>/Step'
-  if (rtb_Subtract2_tmp < octocopter_model_Hinf_RLS_com_P.Step_Time) {
-    tmp = octocopter_model_Hinf_RLS_com_P.Step_Y0;
+  if (rtb_Delay11_tmp < octocopter_model_Hinf_RLS_com_P.Step_Time) {
+    denAccum = octocopter_model_Hinf_RLS_com_P.Step_Y0;
   } else {
-    tmp = octocopter_model_Hinf_RLS_com_P.Step_YFinal;
+    denAccum = octocopter_model_Hinf_RLS_com_P.Step_YFinal;
   }
 
   // MATLAB Function: '<S1>/MATLAB Function' incorporates:
   //   Constant: '<S1>/Constant'
   //   Constant: '<S1>/Constant1'
   //   Delay: '<S1>/Delay2'
-  //   Delay: '<S1>/Delay9'
   //   Step: '<S1>/Step'
 
   octocopter_model_MATLABFunction
     (octocopter_model_Hinf_RLS_co_DW.Delay2_DSTATE_g,
      octocopter_model_Hinf_RLS_com_P.Ts,
-     octocopter_model_Hinf_RLS_com_P.Constant1_Value, tmp,
-     &octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a,
+     octocopter_model_Hinf_RLS_com_P.Constant1_Value, denAccum, &rtb_xdot,
      &octocopter_model_Hinf_RLS_co_DW.sf_MATLABFunction);
 
   // MATLAB Function: '<S1>/MATLAB Function16' incorporates:
   //   Delay: '<S1>/Delay'
   //   Delay: '<S1>/Delay1'
-  //   Delay: '<S1>/Delay9'
   //   Product: '<S1>/Product7'
 
   if (std::abs(octocopter_model_Hinf_RLS_co_DW.prev_error_phi) > 0.5F) {
@@ -421,13 +420,13 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
 
   rtb_DiscreteStateSpace[0] = octocopter_model_Hinf_RLS_co_DW.Delay_DSTATE *
     octocopter_model_Hinf_RLS_co_DW.Delay1_DSTATE_m;
-  rtb_DiscreteStateSpace[1] = rtb_DigitalFilter_p;
+  rtb_DiscreteStateSpace[1] = static_cast<real32_T>(rtb_Delay11);
   rtb_DiscreteStateSpace[2] = 1.0F;
-  Ix = 0.0F;
+  Iy = 0.0F;
   for (i = 0; i < 3; i++) {
-    Ix += ((octocopter_model_Hinf_RLS_co_DW.prev_P_phi[3 * i + 1] *
-            rtb_DigitalFilter_p + octocopter_model_Hinf_RLS_co_DW.prev_P_phi[3 *
-            i] * rtb_DiscreteStateSpace[0]) +
+    Iy += ((octocopter_model_Hinf_RLS_co_DW.prev_P_phi[3 * i + 1] * static_cast<
+            real32_T>(rtb_Delay11) + octocopter_model_Hinf_RLS_co_DW.prev_P_phi
+            [3 * i] * rtb_DiscreteStateSpace[0]) +
            octocopter_model_Hinf_RLS_co_DW.prev_P_phi[3 * i + 2]) *
       rtb_DiscreteStateSpace[i];
   }
@@ -435,20 +434,19 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   rtb_DiscreteStateSpace_0 = 0.0F;
   for (i = 0; i < 3; i++) {
     K_phi[i] = ((octocopter_model_Hinf_RLS_co_DW.prev_P_phi[i + 3] *
-                 rtb_DigitalFilter_p +
+                 static_cast<real32_T>(rtb_Delay11) +
                  octocopter_model_Hinf_RLS_co_DW.prev_P_phi[i] *
                  rtb_DiscreteStateSpace[0]) +
-                octocopter_model_Hinf_RLS_co_DW.prev_P_phi[i + 6]) / (Ix +
+                octocopter_model_Hinf_RLS_co_DW.prev_P_phi[i + 6]) / (Iy +
       0.9999F);
     rtb_DiscreteStateSpace_0 += rtb_DiscreteStateSpace[i] *
       octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[i];
   }
 
-  Ix = octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a -
-    rtb_DiscreteStateSpace_0;
-  octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[0] += K_phi[0] * Ix;
-  octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[1] += K_phi[1] * Ix;
-  octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[2] += K_phi[2] * Ix;
+  Iy = rtb_xdot - rtb_DiscreteStateSpace_0;
+  octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[0] += K_phi[0] * Iy;
+  octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[1] += K_phi[1] * Iy;
+  octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[2] += K_phi[2] * Iy;
   for (i = 0; i < 9; i++) {
     b_I[i] = 0;
   }
@@ -460,12 +458,12 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   rtb_DiscreteStateSpace_0 = K_phi[1];
   K_phi_0 = K_phi[2];
   for (i = 0; i < 3; i++) {
-    Ix = rtb_DiscreteStateSpace[i];
-    b_I_0[3 * i] = static_cast<real32_T>(b_I[3 * i]) - Iz * Ix;
+    Iy = rtb_DiscreteStateSpace[i];
+    b_I_0[3 * i] = static_cast<real32_T>(b_I[3 * i]) - Iz * Iy;
     j = 3 * i + 1;
-    b_I_0[j] = static_cast<real32_T>(b_I[j]) - rtb_DiscreteStateSpace_0 * Ix;
+    b_I_0[j] = static_cast<real32_T>(b_I[j]) - rtb_DiscreteStateSpace_0 * Iy;
     j = 3 * i + 2;
-    b_I_0[j] = static_cast<real32_T>(b_I[j]) - K_phi_0 * Ix;
+    b_I_0[j] = static_cast<real32_T>(b_I[j]) - K_phi_0 * Iy;
   }
 
   for (i = 0; i < 9; i++) {
@@ -473,12 +471,12 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   }
 
   for (i = 0; i < 3; i++) {
-    Ix = octocopter_model_Hinf_RLS_co_DW.prev_P_phi[3 * i + 1];
+    Iy = octocopter_model_Hinf_RLS_co_DW.prev_P_phi[3 * i + 1];
     Iz = octocopter_model_Hinf_RLS_co_DW.prev_P_phi[3 * i];
     rtb_DiscreteStateSpace_0 = octocopter_model_Hinf_RLS_co_DW.prev_P_phi[3 * i
       + 2];
     for (j = 0; j < 3; j++) {
-      b_I_0[j + 3 * i] = (b_I_1[j + 3] * Ix + Iz * b_I_1[j]) + b_I_1[j + 6] *
+      b_I_0[j + 3 * i] = (b_I_1[j + 3] * Iy + Iz * b_I_1[j]) + b_I_1[j + 6] *
         rtb_DiscreteStateSpace_0;
     }
   }
@@ -487,11 +485,12 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
     octocopter_model_Hinf_RLS_co_DW.prev_P_phi[i] = b_I_0[i];
   }
 
-  octocopter_model_Hinf_RLS_co_DW.prev_error_phi = std::abs
-    (octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a - ((rtb_DiscreteStateSpace
-       [0] * octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[0] +
-       rtb_DigitalFilter_p * octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[1])
-      + octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[2]));
+  octocopter_model_Hinf_RLS_co_DW.prev_error_phi = std::abs(rtb_xdot -
+    ((rtb_DiscreteStateSpace[0] *
+      octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[0] +
+      static_cast<real32_T>(rtb_Delay11) *
+      octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[1]) +
+     octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[2]));
 
   // MATLAB Function: '<S1>/MATLAB Function7' incorporates:
   //   Delay: '<S21>/Delay1'
@@ -511,6 +510,11 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
 
   // End of MATLAB Function: '<S1>/MATLAB Function7'
 
+  // Outport: '<Root>/inverse_Ix_hat' incorporates:
+  //   Delay: '<S21>/Delay1'
+
+  *arg_inverse_Ix_hat = octocopter_model_Hinf_RLS_co_DW.Delay1_DSTATE;
+
   // Gain: '<S21>/Gain1' incorporates:
   //   Delay: '<S21>/Delay4'
   //   MATLAB Function: '<S1>/MATLAB Function16'
@@ -519,51 +523,45 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
     octocopter_model_Hinf_RLS_com_P.Gain1_Gain *
     octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[2];
 
-  // Delay: '<S1>/Delay10' incorporates:
-  //   Delay: '<S1>/Delay9'
-
-  octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a =
-    octocopter_model_Hinf_RLS_co_DW.Delay10_DSTATE;
-
   // S-Function (sdspbiquad): '<S9>/Digital Filter' incorporates:
-  //   Delay: '<S1>/Delay9'
+  //   Delay: '<S1>/Delay10'
 
-  Ix = (0.00554271741F * octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a -
-        -1.77863181F *
-        octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_b[0]) -
-    0.800802648F * octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_b[1];
-  rtb_DigitalFilter_p = (2.0F *
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_b[0] + Ix) +
+  denAccum = (0.0055427172102806817 *
+              octocopter_model_Hinf_RLS_co_DW.Delay10_DSTATE -
+              -1.7786317778245848 *
+              octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_b[0]) -
+    0.80080264666570755 *
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_b[1];
+  rtb_Delay11 = (2.0 *
+                 octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_b[0]
+                 + denAccum) +
     octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_b[1];
   octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_b[1] =
     octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_b[0];
-  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_b[0] = Ix;
+  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_b[0] = denAccum;
 
   // Step: '<S1>/Step1'
-  if (rtb_Subtract2_tmp < octocopter_model_Hinf_RLS_com_P.Step1_Time) {
-    tmp = octocopter_model_Hinf_RLS_com_P.Step1_Y0_e;
+  if (rtb_Delay11_tmp < octocopter_model_Hinf_RLS_com_P.Step1_Time) {
+    denAccum = octocopter_model_Hinf_RLS_com_P.Step1_Y0_e;
   } else {
-    tmp = octocopter_model_Hinf_RLS_com_P.Step1_YFinal_a;
+    denAccum = octocopter_model_Hinf_RLS_com_P.Step1_YFinal_a;
   }
 
   // MATLAB Function: '<S1>/MATLAB Function1' incorporates:
   //   Constant: '<S1>/Constant4'
   //   Constant: '<S1>/Constant5'
   //   Delay: '<S1>/Delay5'
-  //   Delay: '<S1>/Delay9'
   //   Step: '<S1>/Step1'
 
   octocopter_model_MATLABFunction
     (octocopter_model_Hinf_RLS_co_DW.Delay5_DSTATE_h,
      octocopter_model_Hinf_RLS_com_P.Ts,
-     octocopter_model_Hinf_RLS_com_P.Constant5_Value_m, tmp,
-     &octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a,
+     octocopter_model_Hinf_RLS_com_P.Constant5_Value_m, denAccum, &rtb_xdot,
      &octocopter_model_Hinf_RLS_co_DW.sf_MATLABFunction1);
 
   // MATLAB Function: '<S1>/MATLAB Function23' incorporates:
   //   Delay: '<S1>/Delay3'
   //   Delay: '<S1>/Delay4'
-  //   Delay: '<S1>/Delay9'
   //   MATLAB Function: '<S1>/MATLAB Function16'
   //   Product: '<S1>/Product8'
 
@@ -575,34 +573,33 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
 
   K_phi[0] = octocopter_model_Hinf_RLS_co_DW.Delay3_DSTATE_d *
     octocopter_model_Hinf_RLS_co_DW.Delay4_DSTATE_f;
-  K_phi[1] = rtb_DigitalFilter_p;
+  K_phi[1] = static_cast<real32_T>(rtb_Delay11);
   K_phi[2] = 1.0F;
   Iz = 0.0F;
   for (i = 0; i < 3; i++) {
     Iz += ((octocopter_model_Hinf_RLS_co_DW.prev_P_theta[3 * i + 1] *
-            rtb_DigitalFilter_p + octocopter_model_Hinf_RLS_co_DW.prev_P_theta[3
-            * i] * K_phi[0]) + octocopter_model_Hinf_RLS_co_DW.prev_P_theta[3 *
-           i + 2]) * K_phi[i];
+            static_cast<real32_T>(rtb_Delay11) +
+            octocopter_model_Hinf_RLS_co_DW.prev_P_theta[3 * i] * K_phi[0]) +
+           octocopter_model_Hinf_RLS_co_DW.prev_P_theta[3 * i + 2]) * K_phi[i];
   }
 
   rtb_DiscreteStateSpace_0 = 0.0F;
   for (i = 0; i < 3; i++) {
     rtb_DiscreteStateSpace[i] = ((octocopter_model_Hinf_RLS_co_DW.prev_P_theta[i
-      + 3] * rtb_DigitalFilter_p +
+      + 3] * static_cast<real32_T>(rtb_Delay11) +
       octocopter_model_Hinf_RLS_co_DW.prev_P_theta[i] * K_phi[0]) +
       octocopter_model_Hinf_RLS_co_DW.prev_P_theta[i + 6]) / (Iz + 0.9999F);
     rtb_DiscreteStateSpace_0 += K_phi[i] *
       octocopter_model_Hinf_RLS_co_DW.prev_estimate_theta[i];
   }
 
-  Ix = octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a -
-    rtb_DiscreteStateSpace_0;
+  Iy = rtb_xdot - rtb_DiscreteStateSpace_0;
   octocopter_model_Hinf_RLS_co_DW.prev_estimate_theta[0] +=
-    rtb_DiscreteStateSpace[0] * Ix;
+    rtb_DiscreteStateSpace[0] * Iy;
   octocopter_model_Hinf_RLS_co_DW.prev_estimate_theta[1] +=
-    rtb_DiscreteStateSpace[1] * Ix;
+    rtb_DiscreteStateSpace[1] * Iy;
   octocopter_model_Hinf_RLS_co_DW.prev_estimate_theta[2] +=
-    rtb_DiscreteStateSpace[2] * Ix;
+    rtb_DiscreteStateSpace[2] * Iy;
   for (i = 0; i < 9; i++) {
     b_I[i] = 0;
   }
@@ -610,12 +607,12 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   b_I[0] = 1;
   b_I[4] = 1;
   b_I[8] = 1;
-  Ix = rtb_DiscreteStateSpace[0];
+  Iy = rtb_DiscreteStateSpace[0];
   rtb_DiscreteStateSpace_0 = rtb_DiscreteStateSpace[1];
   K_phi_0 = rtb_DiscreteStateSpace[2];
   for (i = 0; i < 3; i++) {
     Iz = K_phi[i];
-    b_I_0[3 * i] = static_cast<real32_T>(b_I[3 * i]) - Ix * Iz;
+    b_I_0[3 * i] = static_cast<real32_T>(b_I[3 * i]) - Iy * Iz;
     j = 3 * i + 1;
     b_I_0[j] = static_cast<real32_T>(b_I[j]) - rtb_DiscreteStateSpace_0 * Iz;
     j = 3 * i + 2;
@@ -623,12 +620,12 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   }
 
   for (i = 0; i < 3; i++) {
-    Ix = b_I_0[i + 3];
+    Iy = b_I_0[i + 3];
     Iz = b_I_0[i];
     rtb_DiscreteStateSpace_0 = b_I_0[i + 6];
     for (j = 0; j < 3; j++) {
       b_I_1[i + 3 * j] = ((octocopter_model_Hinf_RLS_co_DW.prev_P_theta[3 * j +
-                           1] * Ix +
+                           1] * Iy +
                            octocopter_model_Hinf_RLS_co_DW.prev_P_theta[3 * j] *
                            Iz) + octocopter_model_Hinf_RLS_co_DW.prev_P_theta[3 *
                           j + 2] * rtb_DiscreteStateSpace_0) / 0.9999F;
@@ -639,59 +636,51 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
     octocopter_model_Hinf_RLS_co_DW.prev_P_theta[i] = b_I_1[i];
   }
 
-  octocopter_model_Hinf_RLS_co_DW.prev_error_theta = std::abs
-    (octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a - ((K_phi[0] *
-       octocopter_model_Hinf_RLS_co_DW.prev_estimate_theta[0] +
-       rtb_DigitalFilter_p *
-       octocopter_model_Hinf_RLS_co_DW.prev_estimate_theta[1]) +
-      octocopter_model_Hinf_RLS_co_DW.prev_estimate_theta[2]));
-
-  // Delay: '<S1>/Delay11' incorporates:
-  //   Delay: '<S1>/Delay9'
-
-  octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a =
-    octocopter_model_Hinf_RLS_co_DW.Delay11_DSTATE;
+  octocopter_model_Hinf_RLS_co_DW.prev_error_theta = std::abs(rtb_xdot -
+    ((K_phi[0] * octocopter_model_Hinf_RLS_co_DW.prev_estimate_theta[0] +
+      static_cast<real32_T>(rtb_Delay11) *
+      octocopter_model_Hinf_RLS_co_DW.prev_estimate_theta[1]) +
+     octocopter_model_Hinf_RLS_co_DW.prev_estimate_theta[2]));
 
   // S-Function (sdspbiquad): '<S10>/Digital Filter' incorporates:
-  //   Delay: '<S1>/Delay9'
+  //   Delay: '<S1>/Delay11'
 
-  Ix = (0.00554271741F * octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a -
-        -1.77863181F *
-        octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_lf[0]) -
-    0.800802648F * octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_lf
-    [1];
-  rtb_DigitalFilter_p = (2.0F *
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_lf[0] + Ix) +
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_lf[1];
-  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_lf[1] =
-    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_lf[0];
-  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_lf[0] = Ix;
+  denAccum = (0.0055427172102806817 *
+              octocopter_model_Hinf_RLS_co_DW.Delay11_DSTATE -
+              -1.7786317778245848 *
+              octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_l[0]) -
+    0.80080264666570755 *
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_l[1];
+  rtb_Delay11 = (2.0 *
+                 octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_l[0]
+                 + denAccum) +
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_l[1];
+  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_l[1] =
+    octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_l[0];
+  octocopter_model_Hinf_RLS_co_DW.DigitalFilter_FILT_STATES_l[0] = denAccum;
 
   // Step: '<S1>/Step2'
-  if (rtb_Subtract2_tmp < octocopter_model_Hinf_RLS_com_P.Step2_Time) {
-    tmp = octocopter_model_Hinf_RLS_com_P.Step2_Y0_o;
+  if (rtb_Delay11_tmp < octocopter_model_Hinf_RLS_com_P.Step2_Time) {
+    denAccum = octocopter_model_Hinf_RLS_com_P.Step2_Y0_o;
   } else {
-    tmp = octocopter_model_Hinf_RLS_com_P.Step2_YFinal_c;
+    denAccum = octocopter_model_Hinf_RLS_com_P.Step2_YFinal_c;
   }
 
   // MATLAB Function: '<S1>/MATLAB Function2' incorporates:
   //   Constant: '<S1>/Constant6'
   //   Constant: '<S1>/Constant7'
   //   Delay: '<S1>/Delay8'
-  //   Delay: '<S1>/Delay9'
   //   Step: '<S1>/Step2'
 
   octocopter_model_MATLABFunction
     (octocopter_model_Hinf_RLS_co_DW.Delay8_DSTATE_i,
      octocopter_model_Hinf_RLS_com_P.Ts,
-     octocopter_model_Hinf_RLS_com_P.Constant7_Value_f, tmp,
-     &octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a,
+     octocopter_model_Hinf_RLS_com_P.Constant7_Value_f, denAccum, &rtb_xdot,
      &octocopter_model_Hinf_RLS_co_DW.sf_MATLABFunction2);
 
   // MATLAB Function: '<S1>/MATLAB Function3' incorporates:
   //   Delay: '<S1>/Delay6'
   //   Delay: '<S1>/Delay7'
-  //   Delay: '<S1>/Delay9'
   //   MATLAB Function: '<S1>/MATLAB Function16'
   //   Product: '<S1>/Product9'
 
@@ -703,20 +692,20 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
 
   K_phi[0] = octocopter_model_Hinf_RLS_co_DW.Delay6_DSTATE_h *
     octocopter_model_Hinf_RLS_co_DW.Delay7_DSTATE_o;
-  K_phi[1] = rtb_DigitalFilter_p;
+  K_phi[1] = static_cast<real32_T>(rtb_Delay11);
   K_phi[2] = 1.0F;
   Iz = 0.0F;
   for (i = 0; i < 3; i++) {
-    Iz += ((octocopter_model_Hinf_RLS_co_DW.prev_P_psi[3 * i + 1] *
-            rtb_DigitalFilter_p + octocopter_model_Hinf_RLS_co_DW.prev_P_psi[3 *
-            i] * K_phi[0]) + octocopter_model_Hinf_RLS_co_DW.prev_P_psi[3 * i +
-           2]) * K_phi[i];
+    Iz += ((octocopter_model_Hinf_RLS_co_DW.prev_P_psi[3 * i + 1] * static_cast<
+            real32_T>(rtb_Delay11) + octocopter_model_Hinf_RLS_co_DW.prev_P_psi
+            [3 * i] * K_phi[0]) + octocopter_model_Hinf_RLS_co_DW.prev_P_psi[3 *
+           i + 2]) * K_phi[i];
   }
 
   rtb_DiscreteStateSpace_0 = 0.0F;
   for (i = 0; i < 3; i++) {
     K_psi[i] = ((octocopter_model_Hinf_RLS_co_DW.prev_P_psi[i + 3] *
-                 rtb_DigitalFilter_p +
+                 static_cast<real32_T>(rtb_Delay11) +
                  octocopter_model_Hinf_RLS_co_DW.prev_P_psi[i] * K_phi[0]) +
                 octocopter_model_Hinf_RLS_co_DW.prev_P_psi[i + 6]) / (Iz +
       0.9999F);
@@ -724,11 +713,10 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
       octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[i];
   }
 
-  Ix = octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a -
-    rtb_DiscreteStateSpace_0;
-  octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[0] += K_psi[0] * Ix;
-  octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[1] += K_psi[1] * Ix;
-  octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[2] += K_psi[2] * Ix;
+  Iy = rtb_xdot - rtb_DiscreteStateSpace_0;
+  octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[0] += K_psi[0] * Iy;
+  octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[1] += K_psi[1] * Iy;
+  octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[2] += K_psi[2] * Iy;
   for (i = 0; i < 9; i++) {
     b_I[i] = 0;
   }
@@ -736,12 +724,12 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   b_I[0] = 1;
   b_I[4] = 1;
   b_I[8] = 1;
-  Ix = K_psi[0];
+  Iy = K_psi[0];
   rtb_DiscreteStateSpace_0 = K_psi[1];
   K_phi_0 = K_psi[2];
   for (i = 0; i < 3; i++) {
     Iz = K_phi[i];
-    b_I_0[3 * i] = static_cast<real32_T>(b_I[3 * i]) - Ix * Iz;
+    b_I_0[3 * i] = static_cast<real32_T>(b_I[3 * i]) - Iy * Iz;
     j = 3 * i + 1;
     b_I_0[j] = static_cast<real32_T>(b_I[j]) - rtb_DiscreteStateSpace_0 * Iz;
     j = 3 * i + 2;
@@ -749,12 +737,12 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   }
 
   for (i = 0; i < 3; i++) {
-    Ix = b_I_0[i + 3];
+    Iy = b_I_0[i + 3];
     Iz = b_I_0[i];
     rtb_DiscreteStateSpace_0 = b_I_0[i + 6];
     for (j = 0; j < 3; j++) {
       b_I_1[i + 3 * j] = ((octocopter_model_Hinf_RLS_co_DW.prev_P_psi[3 * j + 1]
-                           * Ix + octocopter_model_Hinf_RLS_co_DW.prev_P_psi[3 *
+                           * Iy + octocopter_model_Hinf_RLS_co_DW.prev_P_psi[3 *
                            j] * Iz) +
                           octocopter_model_Hinf_RLS_co_DW.prev_P_psi[3 * j + 2] *
                           rtb_DiscreteStateSpace_0) / 0.9999F;
@@ -765,11 +753,11 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
     octocopter_model_Hinf_RLS_co_DW.prev_P_psi[i] = b_I_1[i];
   }
 
-  octocopter_model_Hinf_RLS_co_DW.prev_error_psi = std::abs
-    (octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a - ((K_phi[0] *
-       octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[0] +
-       rtb_DigitalFilter_p * octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[1])
-      + octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[2]));
+  octocopter_model_Hinf_RLS_co_DW.prev_error_psi = std::abs(rtb_xdot - ((K_phi[0]
+    * octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[0] +
+    static_cast<real32_T>(rtb_Delay11) *
+    octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[1]) +
+    octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[2]));
 
   // MATLAB Function: '<S1>/MATLAB Function9' incorporates:
   //   Delay: '<S21>/Delay2'
@@ -779,16 +767,12 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   //   MATLAB Function: '<S1>/MATLAB Function23'
   //   MATLAB Function: '<S1>/MATLAB Function3'
 
-  Ix = 1.0F / octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[1];
-  rtb_DigitalFilter_p = 1.0F /
-    octocopter_model_Hinf_RLS_co_DW.prev_estimate_theta[1];
+  rtb_xdot = 1.0F / octocopter_model_Hinf_RLS_co_DW.prev_estimate_phi[1];
+  Iy = 1.0F / octocopter_model_Hinf_RLS_co_DW.prev_estimate_theta[1];
   Iz = 1.0F / octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[1];
-  octocopter_model_Hinf_RLS_co_DW.Delay2_DSTATE = (rtb_DigitalFilter_p - Iz) /
-    Ix;
-  octocopter_model_Hinf_RLS_co_DW.Delay5_DSTATE = (Iz - Ix) /
-    rtb_DigitalFilter_p;
-  octocopter_model_Hinf_RLS_co_DW.Delay7_DSTATE = (Ix - rtb_DigitalFilter_p) /
-    Iz;
+  octocopter_model_Hinf_RLS_co_DW.Delay2_DSTATE = (Iy - Iz) / rtb_xdot;
+  octocopter_model_Hinf_RLS_co_DW.Delay5_DSTATE = (Iz - rtb_xdot) / Iy;
+  octocopter_model_Hinf_RLS_co_DW.Delay7_DSTATE = (rtb_xdot - Iy) / Iz;
 
   // MATLAB Function: '<S1>/MATLAB Function14' incorporates:
   //   Delay: '<S21>/Delay8'
@@ -808,11 +792,16 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
 
   // End of MATLAB Function: '<S1>/MATLAB Function14'
 
+  // Outport: '<Root>/inverse_Iz_hat' incorporates:
+  //   Delay: '<S21>/Delay8'
+
+  *arg_inverse_Iz_hat = octocopter_model_Hinf_RLS_co_DW.Delay8_DSTATE;
+
   // Gain: '<S21>/Gain2' incorporates:
   //   Delay: '<S21>/Delay9'
   //   MATLAB Function: '<S1>/MATLAB Function3'
 
-  octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE =
+  octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_o =
     octocopter_model_Hinf_RLS_com_P.Gain2_Gain *
     octocopter_model_Hinf_RLS_co_DW.prev_estimate_psi[2];
 
@@ -834,6 +823,11 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
 
   // End of MATLAB Function: '<S1>/MATLAB Function11'
 
+  // Outport: '<Root>/inverse_Iy_hat' incorporates:
+  //   Delay: '<S21>/Delay3'
+
+  *arg_inverse_Iy_hat = octocopter_model_Hinf_RLS_co_DW.Delay3_DSTATE;
+
   // Gain: '<S21>/Gain' incorporates:
   //   Delay: '<S21>/Delay6'
   //   MATLAB Function: '<S1>/MATLAB Function23'
@@ -846,16 +840,16 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
   //   SignalConversion generated from: '<S1>/Discrete State-Space'
 
   for (i = 0; i < 11; i++) {
-    Ix = 0.0F;
+    rtb_xdot = 0.0F;
     for (j = 0; j < 11; j++) {
-      Ix += octocopter_model_Hinf_RLS_com_P.A_KR[11 * j + i] *
+      rtb_xdot += octocopter_model_Hinf_RLS_com_P.A_KR[11 * j + i] *
         octocopter_model_Hinf_RLS_co_DW.DiscreteStateSpace_DSTATE[j];
     }
 
-    xnew[i] = ((octocopter_model_Hinf_RLS_com_P.B_KR[i] * *arg_inverse_Ix_hat +
-                Ix) + octocopter_model_Hinf_RLS_com_P.B_KR[i + 11] *
-               *arg_inverse_Iy_hat) + octocopter_model_Hinf_RLS_com_P.B_KR[i +
-      22] * *arg_inverse_Iz_hat;
+    xnew[i] = ((octocopter_model_Hinf_RLS_com_P.B_KR[i] * rtb_DigitalFilter_j +
+                rtb_xdot) + octocopter_model_Hinf_RLS_com_P.B_KR[i + 11] *
+               rtb_DigitalFilter_bs) + octocopter_model_Hinf_RLS_com_P.B_KR[i +
+      22] * TmpSignalConversionAtDiscreteSt;
   }
 
   for (i = 0; i < 11; i++) {
@@ -864,41 +858,47 @@ void octocopter_model_Hinf_RLS_combined::step(real32_T *arg_tau_y, real32_T
 
   // End of Update for DiscreteStateSpace: '<S1>/Discrete State-Space'
 
-  // Update for Delay: '<S1>/Delay9'
-  octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a = *arg_tau_x;
+  // Update for Delay: '<S1>/Delay9' incorporates:
+  //   Inport: '<Root>/real_tau_x'
 
-  // Update for Delay: '<S1>/Delay2'
-  octocopter_model_Hinf_RLS_co_DW.Delay2_DSTATE_g = rtb_DigitalFilter_lt;
+  octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE = *arg_real_tau_x;
 
   // Update for Delay: '<S1>/Delay'
-  octocopter_model_Hinf_RLS_co_DW.Delay_DSTATE = rtb_DigitalFilter;
+  octocopter_model_Hinf_RLS_co_DW.Delay_DSTATE = rtb_DigitalFilter_o;
 
   // Update for Delay: '<S1>/Delay1'
-  octocopter_model_Hinf_RLS_co_DW.Delay1_DSTATE_m = rtb_DigitalFilter_d;
+  octocopter_model_Hinf_RLS_co_DW.Delay1_DSTATE_m = rtb_DigitalFilter_n;
 
-  // Update for Delay: '<S1>/Delay10'
-  octocopter_model_Hinf_RLS_co_DW.Delay10_DSTATE = *arg_tau_y;
-
-  // Update for Delay: '<S1>/Delay5'
-  octocopter_model_Hinf_RLS_co_DW.Delay5_DSTATE_h = rtb_DigitalFilter;
+  // Update for Delay: '<S1>/Delay2'
+  octocopter_model_Hinf_RLS_co_DW.Delay2_DSTATE_g = rtb_DigitalFilter_d;
 
   // Update for Delay: '<S1>/Delay3'
-  octocopter_model_Hinf_RLS_co_DW.Delay3_DSTATE_d = rtb_DigitalFilter_d;
+  octocopter_model_Hinf_RLS_co_DW.Delay3_DSTATE_d = rtb_DigitalFilter_n;
 
   // Update for Delay: '<S1>/Delay4'
-  octocopter_model_Hinf_RLS_co_DW.Delay4_DSTATE_f = rtb_DigitalFilter_lt;
+  octocopter_model_Hinf_RLS_co_DW.Delay4_DSTATE_f = rtb_DigitalFilter_d;
 
-  // Update for Delay: '<S1>/Delay11'
-  octocopter_model_Hinf_RLS_co_DW.Delay11_DSTATE = *arg_tau_z;
+  // Update for Delay: '<S1>/Delay10' incorporates:
+  //   Inport: '<Root>/real_tau_y'
+
+  octocopter_model_Hinf_RLS_co_DW.Delay10_DSTATE = *arg_real_tau_y;
+
+  // Update for Delay: '<S1>/Delay5'
+  octocopter_model_Hinf_RLS_co_DW.Delay5_DSTATE_h = rtb_DigitalFilter_o;
 
   // Update for Delay: '<S1>/Delay6'
-  octocopter_model_Hinf_RLS_co_DW.Delay6_DSTATE_h = rtb_DigitalFilter_lt;
+  octocopter_model_Hinf_RLS_co_DW.Delay6_DSTATE_h = rtb_DigitalFilter_d;
 
   // Update for Delay: '<S1>/Delay7'
-  octocopter_model_Hinf_RLS_co_DW.Delay7_DSTATE_o = rtb_DigitalFilter;
+  octocopter_model_Hinf_RLS_co_DW.Delay7_DSTATE_o = rtb_DigitalFilter_o;
+
+  // Update for Delay: '<S1>/Delay11' incorporates:
+  //   Inport: '<Root>/real_tau_z'
+
+  octocopter_model_Hinf_RLS_co_DW.Delay11_DSTATE = *arg_real_tau_z;
 
   // Update for Delay: '<S1>/Delay8'
-  octocopter_model_Hinf_RLS_co_DW.Delay8_DSTATE_i = rtb_DigitalFilter_d;
+  octocopter_model_Hinf_RLS_co_DW.Delay8_DSTATE_i = rtb_DigitalFilter_n;
 
   // Update absolute time for base rate
   // The "clockTick0" counts the number of times the code of this task has
@@ -957,20 +957,16 @@ void octocopter_model_Hinf_RLS_combined::initialize()
       octocopter_model_Hinf_RLS_com_P.Delay7_InitialCondition;
 
     // InitializeConditions for Delay: '<S21>/Delay9'
-    octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE =
-      octocopter_model_Hinf_RLS_com_P.Delay9_InitialCondition;
+    octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_o =
+      octocopter_model_Hinf_RLS_com_P.Delay9_InitialCondition_f;
 
     // InitializeConditions for Delay: '<S21>/Delay8'
     octocopter_model_Hinf_RLS_co_DW.Delay8_DSTATE =
       octocopter_model_Hinf_RLS_com_P.Delay8_InitialCondition;
 
     // InitializeConditions for Delay: '<S1>/Delay9'
-    octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE_a =
-      octocopter_model_Hinf_RLS_com_P.Delay9_InitialCondition_o;
-
-    // InitializeConditions for Delay: '<S1>/Delay2'
-    octocopter_model_Hinf_RLS_co_DW.Delay2_DSTATE_g =
-      octocopter_model_Hinf_RLS_com_P.Delay2_InitialCondition_l;
+    octocopter_model_Hinf_RLS_co_DW.Delay9_DSTATE =
+      octocopter_model_Hinf_RLS_com_P.Delay9_InitialCondition;
 
     // InitializeConditions for Delay: '<S1>/Delay'
     octocopter_model_Hinf_RLS_co_DW.Delay_DSTATE =
@@ -980,13 +976,9 @@ void octocopter_model_Hinf_RLS_combined::initialize()
     octocopter_model_Hinf_RLS_co_DW.Delay1_DSTATE_m =
       octocopter_model_Hinf_RLS_com_P.Delay1_InitialCondition_f;
 
-    // InitializeConditions for Delay: '<S1>/Delay10'
-    octocopter_model_Hinf_RLS_co_DW.Delay10_DSTATE =
-      octocopter_model_Hinf_RLS_com_P.Delay10_InitialCondition;
-
-    // InitializeConditions for Delay: '<S1>/Delay5'
-    octocopter_model_Hinf_RLS_co_DW.Delay5_DSTATE_h =
-      octocopter_model_Hinf_RLS_com_P.Delay5_InitialCondition_l;
+    // InitializeConditions for Delay: '<S1>/Delay2'
+    octocopter_model_Hinf_RLS_co_DW.Delay2_DSTATE_g =
+      octocopter_model_Hinf_RLS_com_P.Delay2_InitialCondition_l;
 
     // InitializeConditions for Delay: '<S1>/Delay3'
     octocopter_model_Hinf_RLS_co_DW.Delay3_DSTATE_d =
@@ -996,9 +988,13 @@ void octocopter_model_Hinf_RLS_combined::initialize()
     octocopter_model_Hinf_RLS_co_DW.Delay4_DSTATE_f =
       octocopter_model_Hinf_RLS_com_P.Delay4_InitialCondition_o;
 
-    // InitializeConditions for Delay: '<S1>/Delay11'
-    octocopter_model_Hinf_RLS_co_DW.Delay11_DSTATE =
-      octocopter_model_Hinf_RLS_com_P.Delay11_InitialCondition;
+    // InitializeConditions for Delay: '<S1>/Delay10'
+    octocopter_model_Hinf_RLS_co_DW.Delay10_DSTATE =
+      octocopter_model_Hinf_RLS_com_P.Delay10_InitialCondition;
+
+    // InitializeConditions for Delay: '<S1>/Delay5'
+    octocopter_model_Hinf_RLS_co_DW.Delay5_DSTATE_h =
+      octocopter_model_Hinf_RLS_com_P.Delay5_InitialCondition_l;
 
     // InitializeConditions for Delay: '<S1>/Delay6'
     octocopter_model_Hinf_RLS_co_DW.Delay6_DSTATE_h =
@@ -1007,6 +1003,10 @@ void octocopter_model_Hinf_RLS_combined::initialize()
     // InitializeConditions for Delay: '<S1>/Delay7'
     octocopter_model_Hinf_RLS_co_DW.Delay7_DSTATE_o =
       octocopter_model_Hinf_RLS_com_P.Delay7_InitialCondition_c;
+
+    // InitializeConditions for Delay: '<S1>/Delay11'
+    octocopter_model_Hinf_RLS_co_DW.Delay11_DSTATE =
+      octocopter_model_Hinf_RLS_com_P.Delay11_InitialCondition;
 
     // InitializeConditions for Delay: '<S1>/Delay8'
     octocopter_model_Hinf_RLS_co_DW.Delay8_DSTATE_i =

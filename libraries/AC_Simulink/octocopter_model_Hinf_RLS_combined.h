@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'octocopter_model_Hinf_RLS_combined'.
 //
-// Model version                  : 16.132
+// Model version                  : 16.134
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Mon Mar 23 17:44:45 2026
+// C/C++ source code generated on : Thu Apr 16 17:30:47 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -36,7 +36,13 @@ class octocopter_model_Hinf_RLS_combined final
 
   // Block states (default storage) for system '<Root>'
   struct DW_octocopter_model_Hinf_RLS__T {
-    real32_T DigitalFilter_FILT_STATES[2];// '<S2>/Digital Filter'
+    real_T Delay9_DSTATE;              // '<S1>/Delay9'
+    real_T DigitalFilter_FILT_STATES[2];// '<S8>/Digital Filter'
+    real_T Delay10_DSTATE;             // '<S1>/Delay10'
+    real_T DigitalFilter_FILT_STATES_b[2];// '<S9>/Digital Filter'
+    real_T Delay11_DSTATE;             // '<S1>/Delay11'
+    real_T DigitalFilter_FILT_STATES_l[2];// '<S10>/Digital Filter'
+    real32_T DigitalFilter_FILT_STATES_k[2];// '<S2>/Digital Filter'
     real32_T DigitalFilter_FILT_STATES_f[2];// '<S3>/Digital Filter'
     real32_T DigitalFilter_FILT_STATES_m[2];// '<S4>/Digital Filter'
     real32_T DiscreteStateSpace_DSTATE[11];// '<S1>/Discrete State-Space'
@@ -45,25 +51,19 @@ class octocopter_model_Hinf_RLS_combined final
     real32_T Delay4_DSTATE;            // '<S21>/Delay4'
     real32_T DigitalFilter_FILT_STATES_e[2];// '<S6>/Digital Filter'
     real32_T DigitalFilter_FILT_STATES_mm[2];// '<S7>/Digital Filter'
-    real32_T DigitalFilter_FILT_STATES_l[2];// '<S5>/Digital Filter'
+    real32_T DigitalFilter_FILT_STATES_lh[2];// '<S5>/Digital Filter'
     real32_T Delay3_DSTATE;            // '<S21>/Delay3'
     real32_T Delay5_DSTATE;            // '<S21>/Delay5'
     real32_T Delay6_DSTATE;            // '<S21>/Delay6'
     real32_T Delay7_DSTATE;            // '<S21>/Delay7'
-    real32_T Delay9_DSTATE;            // '<S21>/Delay9'
+    real32_T Delay9_DSTATE_o;          // '<S21>/Delay9'
     real32_T Delay8_DSTATE;            // '<S21>/Delay8'
-    real32_T Delay9_DSTATE_a;          // '<S1>/Delay9'
-    real32_T DigitalFilter_FILT_STATES_a[2];// '<S8>/Digital Filter'
-    real32_T Delay2_DSTATE_g;          // '<S1>/Delay2'
     real32_T Delay_DSTATE;             // '<S1>/Delay'
     real32_T Delay1_DSTATE_m;          // '<S1>/Delay1'
-    real32_T Delay10_DSTATE;           // '<S1>/Delay10'
-    real32_T DigitalFilter_FILT_STATES_b[2];// '<S9>/Digital Filter'
-    real32_T Delay5_DSTATE_h;          // '<S1>/Delay5'
+    real32_T Delay2_DSTATE_g;          // '<S1>/Delay2'
     real32_T Delay3_DSTATE_d;          // '<S1>/Delay3'
     real32_T Delay4_DSTATE_f;          // '<S1>/Delay4'
-    real32_T Delay11_DSTATE;           // '<S1>/Delay11'
-    real32_T DigitalFilter_FILT_STATES_lf[2];// '<S10>/Digital Filter'
+    real32_T Delay5_DSTATE_h;          // '<S1>/Delay5'
     real32_T Delay6_DSTATE_h;          // '<S1>/Delay6'
     real32_T Delay7_DSTATE_o;          // '<S1>/Delay7'
     real32_T Delay8_DSTATE_i;          // '<S1>/Delay8'
@@ -194,6 +194,9 @@ class octocopter_model_Hinf_RLS_combined final
     real_T Switch6_Threshold;          // Expression: 0
                                           //  Referenced by: '<S21>/Switch6'
 
+    real_T Delay9_InitialCondition;    // Expression: 0.0
+                                          //  Referenced by: '<S1>/Delay9'
+
     real_T Constant1_Value;            // Expression: 40
                                           //  Referenced by: '<S1>/Constant1'
 
@@ -206,6 +209,9 @@ class octocopter_model_Hinf_RLS_combined final
     real_T Step_YFinal;                // Expression: 0
                                           //  Referenced by: '<S1>/Step'
 
+    real_T Delay10_InitialCondition;   // Expression: 0.0
+                                          //  Referenced by: '<S1>/Delay10'
+
     real_T Constant5_Value_m;          // Expression: 40
                                           //  Referenced by: '<S1>/Constant5'
 
@@ -217,6 +223,9 @@ class octocopter_model_Hinf_RLS_combined final
 
     real_T Step1_YFinal_a;             // Expression: 0
                                           //  Referenced by: '<S1>/Step1'
+
+    real_T Delay11_InitialCondition;   // Expression: 0.0
+                                          //  Referenced by: '<S1>/Delay11'
 
     real_T Constant7_Value_f;          // Expression: 40
                                           //  Referenced by: '<S1>/Constant7'
@@ -262,21 +271,13 @@ class octocopter_model_Hinf_RLS_combined final
                                   // Computed Parameter: Delay7_InitialCondition
                                      //  Referenced by: '<S21>/Delay7'
 
-    real32_T Delay9_InitialCondition;
-                                  // Computed Parameter: Delay9_InitialCondition
-                                     //  Referenced by: '<S21>/Delay9'
+    real32_T Delay9_InitialCondition_f;
+                                // Computed Parameter: Delay9_InitialCondition_f
+                                   //  Referenced by: '<S21>/Delay9'
 
     real32_T Delay8_InitialCondition;
                                   // Computed Parameter: Delay8_InitialCondition
                                      //  Referenced by: '<S21>/Delay8'
-
-    real32_T Delay9_InitialCondition_o;
-                                // Computed Parameter: Delay9_InitialCondition_o
-                                   //  Referenced by: '<S1>/Delay9'
-
-    real32_T Delay2_InitialCondition_l;
-                                // Computed Parameter: Delay2_InitialCondition_l
-                                   //  Referenced by: '<S1>/Delay2'
 
     real32_T Delay_InitialCondition;
                                    // Computed Parameter: Delay_InitialCondition
@@ -286,16 +287,12 @@ class octocopter_model_Hinf_RLS_combined final
                                 // Computed Parameter: Delay1_InitialCondition_f
                                    //  Referenced by: '<S1>/Delay1'
 
+    real32_T Delay2_InitialCondition_l;
+                                // Computed Parameter: Delay2_InitialCondition_l
+                                   //  Referenced by: '<S1>/Delay2'
+
     real32_T Gain1_Gain;               // Computed Parameter: Gain1_Gain
                                           //  Referenced by: '<S21>/Gain1'
-
-    real32_T Delay10_InitialCondition;
-                                 // Computed Parameter: Delay10_InitialCondition
-                                    //  Referenced by: '<S1>/Delay10'
-
-    real32_T Delay5_InitialCondition_l;
-                                // Computed Parameter: Delay5_InitialCondition_l
-                                   //  Referenced by: '<S1>/Delay5'
 
     real32_T Delay3_InitialCondition_a;
                                 // Computed Parameter: Delay3_InitialCondition_a
@@ -305,9 +302,9 @@ class octocopter_model_Hinf_RLS_combined final
                                 // Computed Parameter: Delay4_InitialCondition_o
                                    //  Referenced by: '<S1>/Delay4'
 
-    real32_T Delay11_InitialCondition;
-                                 // Computed Parameter: Delay11_InitialCondition
-                                    //  Referenced by: '<S1>/Delay11'
+    real32_T Delay5_InitialCondition_l;
+                                // Computed Parameter: Delay5_InitialCondition_l
+                                   //  Referenced by: '<S1>/Delay5'
 
     real32_T Delay6_InitialCondition_f;
                                 // Computed Parameter: Delay6_InitialCondition_f
@@ -377,7 +374,8 @@ class octocopter_model_Hinf_RLS_combined final
             real32_T *arg_q, real32_T *arg_theta_des, real32_T *arg_p, real32_T *
             arg_phi, real32_T *arg_psi, real32_T *arg_phi_des, real32_T
             *arg_inverse_Ix_hat, real32_T *arg_inverse_Iy_hat, real32_T
-            *arg_inverse_Iz_hat);
+            *arg_inverse_Iz_hat, real_T *arg_real_tau_x, real_T *arg_real_tau_y,
+            real_T *arg_real_tau_z);
 
   // model terminate function
   static void terminate();

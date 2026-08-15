@@ -1791,7 +1791,7 @@ void AP_Logger::Write_HRLS(float e_phi, float e_theta, float e_psi, float p, flo
 
 void AP_Logger::Write_ORLS(float inverse_Ix_hat,float inverse_Iy_hat,float inverse_Iz_hat)
 {
-    
+
 
     const struct log_ORLS pkt {
         LOG_PACKET_HEADER_INIT(LOG_ORLS_MSG),
@@ -1799,6 +1799,33 @@ void AP_Logger::Write_ORLS(float inverse_Ix_hat,float inverse_Iy_hat,float inver
         inverse_Ix_hat : inverse_Ix_hat,
         inverse_Iy_hat : inverse_Iy_hat,
         inverse_Iz_hat : inverse_Iz_hat,
+    };
+
+    WriteBlock(&pkt, sizeof(pkt));
+}
+
+void AP_Logger::Write_STRQ(float torque_x, float torque_y, float torque_z)
+{
+    const struct log_STRQ pkt {
+        LOG_PACKET_HEADER_INIT(LOG_STRQ_MSG),
+        time_us  : AP_HAL::micros64(),
+        torque_x : torque_x,
+        torque_y : torque_y,
+        torque_z : torque_z,
+    };
+
+    WriteBlock(&pkt, sizeof(pkt));
+}
+
+void AP_Logger::Write_RTAU(float tau_x, float tau_y, float tau_z, float f_total)
+{
+    const struct log_RTAU pkt {
+        LOG_PACKET_HEADER_INIT(LOG_RTAU_MSG),
+        time_us : AP_HAL::micros64(),
+        tau_x   : tau_x,
+        tau_y   : tau_y,
+        tau_z   : tau_z,
+        f_total : f_total,
     };
 
     WriteBlock(&pkt, sizeof(pkt));
