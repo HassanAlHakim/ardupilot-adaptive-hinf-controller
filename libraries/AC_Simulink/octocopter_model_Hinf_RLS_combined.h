@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'octocopter_model_Hinf_RLS_combined'.
 //
-// Model version                  : 16.134
+// Model version                  : 16.138
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Thu Apr 16 17:30:47 2026
+// C/C++ source code generated on : Sun Sep  6 20:16:24 2026
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -32,6 +32,12 @@ class octocopter_model_Hinf_RLS_combined final
     real32_T x_prev;                   // '<S1>/MATLAB Function'
     real32_T xdot_prev;                // '<S1>/MATLAB Function'
     boolean_T x_prev_not_empty;        // '<S1>/MATLAB Function'
+  };
+
+  // Block states (default storage) for system '<S1>/MATLAB Function11'
+  struct DW_MATLABFunction11_octocopte_T {
+    real32_T y_prev;                   // '<S1>/MATLAB Function11'
+    boolean_T y_prev_not_empty;        // '<S1>/MATLAB Function11'
   };
 
   // Block states (default storage) for system '<Root>'
@@ -67,7 +73,6 @@ class octocopter_model_Hinf_RLS_combined final
     real32_T Delay6_DSTATE_h;          // '<S1>/Delay6'
     real32_T Delay7_DSTATE_o;          // '<S1>/Delay7'
     real32_T Delay8_DSTATE_i;          // '<S1>/Delay8'
-    real32_T y_prev;                   // '<S1>/MATLAB Function7'
     real32_T prev_estimate_psi[3];     // '<S1>/MATLAB Function3'
     real32_T prev_P_psi[9];            // '<S1>/MATLAB Function3'
     real32_T prev_error_psi;           // '<S1>/MATLAB Function3'
@@ -77,9 +82,13 @@ class octocopter_model_Hinf_RLS_combined final
     real32_T prev_estimate_phi[3];     // '<S1>/MATLAB Function16'
     real32_T prev_P_phi[9];            // '<S1>/MATLAB Function16'
     real32_T prev_error_phi;           // '<S1>/MATLAB Function16'
-    real32_T y_prev_g;                 // '<S1>/MATLAB Function14'
-    real32_T y_prev_f;                 // '<S1>/MATLAB Function11'
+    boolean_T prev_estimate_psi_not_empty;// '<S1>/MATLAB Function3'
+    boolean_T prev_estimate_theta_not_empty;// '<S1>/MATLAB Function23'
+    boolean_T prev_estimate_phi_not_empty;// '<S1>/MATLAB Function16'
+    DW_MATLABFunction11_octocopte_T sf_MATLABFunction7;// '<S1>/MATLAB Function7' 
     DW_MATLABFunction_octocopter__T sf_MATLABFunction2;// '<S1>/MATLAB Function2' 
+    DW_MATLABFunction11_octocopte_T sf_MATLABFunction14;// '<S1>/MATLAB Function14' 
+    DW_MATLABFunction11_octocopte_T sf_MATLABFunction11;// '<S1>/MATLAB Function11' 
     DW_MATLABFunction_octocopter__T sf_MATLABFunction1;// '<S1>/MATLAB Function1' 
     DW_MATLABFunction_octocopter__T sf_MATLABFunction;// '<S1>/MATLAB Function'
   };
@@ -88,6 +97,8 @@ class octocopter_model_Hinf_RLS_combined final
   struct P_octocopter_model_Hinf_RLS_c_T {
     real_T Ixx_m;                      // Variable: Ixx_m
                                           //  Referenced by:
+                                          //    '<S1>/Constant2'
+                                          //    '<S1>/Constant3'
                                           //    '<S21>/Constant'
                                           //    '<S21>/Constant1'
                                           //    '<S21>/Constant4'
@@ -95,6 +106,8 @@ class octocopter_model_Hinf_RLS_combined final
 
     real_T Iyy_m;                      // Variable: Iyy_m
                                           //  Referenced by:
+                                          //    '<S1>/Constant10'
+                                          //    '<S1>/Constant8'
                                           //    '<S21>/Constant1'
                                           //    '<S21>/Constant3'
                                           //    '<S21>/Constant4'
@@ -102,6 +115,8 @@ class octocopter_model_Hinf_RLS_combined final
 
     real_T Izz_m;                      // Variable: Izz_m
                                           //  Referenced by:
+                                          //    '<S1>/Constant11'
+                                          //    '<S1>/Constant9'
                                           //    '<S21>/Constant1'
                                           //    '<S21>/Constant4'
                                           //    '<S21>/Constant6'
@@ -112,6 +127,15 @@ class octocopter_model_Hinf_RLS_combined final
                                           //    '<S1>/Constant'
                                           //    '<S1>/Constant4'
                                           //    '<S1>/Constant6'
+
+    real_T epsilon_pitch;              // Variable: epsilon_pitch
+                                          //  Referenced by: '<S1>/Constant13'
+
+    real_T epsilon_roll;               // Variable: epsilon_roll
+                                          //  Referenced by: '<S1>/Constant12'
+
+    real_T epsilon_yaw;                // Variable: epsilon_yaw
+                                          //  Referenced by: '<S1>/Constant14'
 
     real_T twait_RLS;                  // Variable: twait_RLS
                                           //  Referenced by:
@@ -375,7 +399,12 @@ class octocopter_model_Hinf_RLS_combined final
             arg_phi, real32_T *arg_psi, real32_T *arg_phi_des, real32_T
             *arg_inverse_Ix_hat, real32_T *arg_inverse_Iy_hat, real32_T
             *arg_inverse_Iz_hat, real_T *arg_real_tau_x, real_T *arg_real_tau_y,
-            real_T *arg_real_tau_z);
+            real_T *arg_real_tau_z, real32_T *arg_pdot, real32_T *arg_error_phi,
+            real32_T *arg_dphi_hat, real32_T *arg_P_Ix, real32_T *arg_qdot,
+            real32_T *arg_P_Iy, real32_T *arg_e_theta, real32_T *arg_rdot,
+            real32_T *arg_e_psi, real32_T *arg_P_Iz, real32_T *arg_K_Ix,
+            real32_T *arg_K_Iy, real32_T *arg_K_Iz, real32_T *arg_dtheta_hat,
+            real32_T *arg_dpsi_hat);
 
   // model terminate function
   static void terminate();
@@ -396,6 +425,10 @@ class octocopter_model_Hinf_RLS_combined final
     real_T rtu_fc, real_T rtu_reset, real32_T *rty_xdot,
     DW_MATLABFunction_octocopter__T *localDW);
 
+  // private member function(s) for subsystem '<S1>/MATLAB Function11'
+  static void octocopter_mod_MATLABFunction11(real_T rtu_start, real32_T rtu_u,
+    real32_T rtu_K, real32_T *rty_y, DW_MATLABFunction11_octocopte_T *localDW);
+
   // Real-Time Model
   RT_MODEL_octocopter_model_Hin_T octocopter_model_Hinf_RLS_co_M;
 };
@@ -414,6 +447,9 @@ class octocopter_model_Hinf_RLS_combined final
 //  Block '<S30>/Check Signal Attributes' : Unused code path elimination
 //  Block '<S21>/Scope' : Unused code path elimination
 //  Block '<S21>/Scope1' : Unused code path elimination
+//  Block '<S21>/Scope2' : Unused code path elimination
+//  Block '<S21>/Scope3' : Unused code path elimination
+//  Block '<S21>/Scope4' : Unused code path elimination
 
 
 //-

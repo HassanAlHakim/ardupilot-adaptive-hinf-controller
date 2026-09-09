@@ -1831,6 +1831,44 @@ void AP_Logger::Write_RTAU(float tau_x, float tau_y, float tau_z, float f_total)
     WriteBlock(&pkt, sizeof(pkt));
 }
 
+void AP_Logger::Write_RLSE(float pdot, float qdot, float rdot,
+                            float error_phi, float e_theta, float e_psi)
+{
+    const struct log_RLSE pkt {
+        LOG_PACKET_HEADER_INIT(LOG_RLSE_MSG),
+        time_us   : AP_HAL::micros64(),
+        pdot      : pdot,
+        qdot      : qdot,
+        rdot      : rdot,
+        error_phi : error_phi,
+        e_theta   : e_theta,
+        e_psi     : e_psi,
+    };
+
+    WriteBlock(&pkt, sizeof(pkt));
+}
+
+void AP_Logger::Write_RLSH(float dphi_hat, float dtheta_hat, float dpsi_hat,
+                            float P_Ix, float P_Iy, float P_Iz,
+                            float K_Ix, float K_Iy, float K_Iz)
+{
+    const struct log_RLSH pkt {
+        LOG_PACKET_HEADER_INIT(LOG_RLSH_MSG),
+        time_us    : AP_HAL::micros64(),
+        dphi_hat   : dphi_hat,
+        dtheta_hat : dtheta_hat,
+        dpsi_hat   : dpsi_hat,
+        P_Ix       : P_Ix,
+        P_Iy       : P_Iy,
+        P_Iz       : P_Iz,
+        K_Ix       : K_Ix,
+        K_Iy       : K_Iy,
+        K_Iz       : K_Iz,
+    };
+
+    WriteBlock(&pkt, sizeof(pkt));
+}
+
 #endif // HAL_LOGGING_ENABLED
 
 

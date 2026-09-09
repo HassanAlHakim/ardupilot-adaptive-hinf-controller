@@ -83,11 +83,12 @@ private:
     const struct Model {
         // model mass kg
         // float mass = 3.0;
-        float mass = 12.175;
+        float mass = 1.254;
 
         // diameter of model
         // float diagonal_size = 0.35;
-        float diagonal_size = 1.2;
+        // set so that diagonal_size * max thrust per motor (8.4N) = max roll/pitch torque (2.9702 N·m)
+        float diagonal_size = 0.353595;
         /*
           the ref values are for a test at fixed angle, used to estimate drag
          */
@@ -101,13 +102,14 @@ private:
 
         // full pack voltage
         // float maxVoltage = 4.2*3;
-        float maxVoltage = 4.2*6;
+        float maxVoltage = 4.2*4;
 
         // battery capacity in Ah. Use zero for unlimited
         float battCapacityAh = 0.0;
 
         // CTUN.ThO at hover at refAlt
-        float hoverThrOut = 0.39;
+        // set so that mass * GRAVITY_MSS / (num_motors * hoverThrOut) = max thrust per motor (8.4N)
+        float hoverThrOut = 0.366;
 
         // MOT_THST_EXPO
         float propExpo = 0.65;
@@ -136,7 +138,7 @@ private:
         float mdrag_coef = 0.2;
 
         // if zero value will be estimated from mass
-        Vector3f moment_of_inertia;
+        Vector3f moment_of_inertia{0.015, 0.015, 0.031};
 
         Vector3f motor_pos[SIM_FRAME_MAX_ACTUATORS];
         Vector3f motor_thrust_vec[SIM_FRAME_MAX_ACTUATORS];

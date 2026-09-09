@@ -174,6 +174,13 @@ ASXFLAGS += -MD -MP -MF .dep/$(@F).d
 CFLAGS   += -MD -MP -MF .dep/$(@F).d
 CPPFLAGS += -MD -MP -MF .dep/$(@F).d
 
+# GCC >= 12 flags the __eth_rb/__eth_tb/__eth_rd/__eth_td != NULL checks in this
+# vendored ChibiOS driver as always-false (those extern arrays' addresses can
+# never be NULL), and CWARN's -Werror promotes that to a hard build failure on
+# boards with the Ethernet MAC enabled (e.g. Pixhawk6X). Downgrade just this one
+# warning class for this one file rather than editing vendored ChibiOS logic.
+$(OBJDIR)/hal_mac_lld.o: CFLAGS += -Wno-error=address
+
 # Paths where to search for sources
 VPATH     = $(SRCPATHS)
 

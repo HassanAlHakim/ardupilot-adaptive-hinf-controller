@@ -12,16 +12,17 @@
 #include <GCS_MAVLink/GCS.h>
 #include <AP_Logger/LogStructure.h>
 #include <SRV_Channel/SRV_Channel.h>
+#include <AP_BattMonitor/AP_BattMonitor.h>
 
 
 
 // table of user settable parameters
 const AP_Param::GroupInfo AC_CustomControl_XYZ::var_info[] = {
-    // @Param: PARAM1
-    // @DisplayName: XYZ param1
-    // @Description: Dummy parameter for XYZ custom controller backend
+    // @Param: KT
+    // @DisplayName: XYZ motor thrust coefficient
+    // @Description: Thrust coefficient (N per (rad/s)^2), F_i = KT * omega_i^2, used to turn per-motor angular velocity (from the Gauthier et al. electro-mechanical PWM model) into thrust for the real-torque reconstruction fed to the RLS estimator. Identified from real flight-log hover data on the Gazebo Iris model.
     // @User: Advanced
-    AP_GROUPINFO("PARAM1", 1, AC_CustomControl_XYZ, param1, 0.0f),
+    AP_GROUPINFO("KT", 1, AC_CustomControl_XYZ, k_t, 1.8419e-5f),
 
     // @Param: PARAM2
     // @DisplayName: XYZ param2
@@ -38,26 +39,37 @@ const AP_Param::GroupInfo AC_CustomControl_XYZ::var_info[] = {
     AP_GROUPEND
 };
 
-// Octo-X motor geometry, from libraries/AP_Motors/AP_MotorsMatrix.cpp, setup_octa_matrix(),
-// case MOTOR_FRAME_TYPE_X. These are the raw per-motor direction cosines
-// (cos(angle+90) for roll, cos(angle) for pitch, +-1 for yaw) used for physical torque
-// reconstruction - NOT the same as AP_MotorsMatrix::get_roll_factor()/get_pitch_factor(),
-// which return those same values renormalized to +-0.5 for use in the internal PWM mixer.
-// Index 0 = MOT_1 (_pwm_motor1) ... index 7 = MOT_8 (_pwm_motor8).
-static constexpr float ROLL_FACTOR[8]  = { -0.3827f, +0.3827f, -0.9239f, -0.3827f,
-                                            +0.3827f, +0.9239f, +0.9239f, -0.9239f };
-static constexpr float PITCH_FACTOR[8] = { +0.9239f, -0.9239f, +0.3827f, -0.9239f,
-                                            +0.9239f, -0.3827f, +0.3827f, -0.3827f };
-static constexpr float YAW_FACTOR[8]   = { -1.0f, -1.0f, +1.0f, +1.0f,
-                                            +1.0f, +1.0f, -1.0f, -1.0f };
+// Quad-X per-motor body-frame geometry (x forward, y right, meters) and spin
+// direction, identified from real flight-log data on the Gazebo Iris model
+// (replaces the earlier symmetric-X-frame bench estimate). Motors are NOT
+// symmetric diagonal pairs: C1/C2 share spin direction, as do C3/C4.
+//   C1: x=0.13,  y=-0.22, CCW (yaw +1)
+//   C2: x=-0.13, y=0.20,  CCW (yaw +1)
+//   C3: x=0.13,  y=0.22,  CW  (yaw -1)
+//   C4: x=-0.13, y=-0.20, CW  (yaw -1)
+// pwm_us[0..3] = motor1..motor4 = C1..C4 in that order. Verified this index
+// order reproduces the same per-axis sign pattern the previous symmetric-X
+// constants used (Y_I sign pattern matches the old ROLL_FACTOR, X_I matches
+// the old PITCH_FACTOR, spin pattern matches SPIN_DIR), so tau_x/tau_y below
+// keep the same sign convention with no flip needed.
+static constexpr float X_I[4]      = { 0.13f, -0.13f, 0.13f, -0.13f };    // m
+static constexpr float Y_I[4]      = { -0.22f, 0.20f, 0.22f, -0.20f };    // m
+static constexpr float SPIN_DIR[4] = { +1.0f, +1.0f, -1.0f, -1.0f };      // CCW=+1, CW=-1
 
-// Bench-fit motor model (U7 V2 490KV, 16x5.5 prop, 6S battery)
-static constexpr float OMEGA_A =  -991.705f;
-static constexpr float OMEGA_B =  2044.823f;
-static constexpr float OMEGA_C =  -209.029f;
-static constexpr float K_T     = 5.80660e-5f;   // N / (rad/s)^2
-static constexpr float C_Q     = 0.019544f;     // Q/T ratio, m
-static constexpr float ARM_L   = 0.6f;          // m, CG to motor
+// Electro-mechanical PWM->omega model, Gauthier et al. (arXiv:2312.09981) structure
+// retained as-is; OMEGA_MAX_REF and K_Q below are retuned to the flight-log-identified
+// values from the Gazebo Iris model (omega_max=838 rad/s at full throttle, k_tau=1.485e-7).
+// alpha is left at the paper's value (no flight-log alpha estimate available). Note
+// OMEGA_MAX_REF is only the full-throttle omega at this same V_BATT_REF/KV_REF
+// reference point used for the (unchanged) live voltage/KV rescaling below, so the
+// model reaches ~838 rad/s at full throttle only approximately, not exactly.
+static constexpr float OMEGA_ALPHA   = 800.0f;    // rad/s
+static constexpr float K_Q           = 1.485e-7f; // N.m.s^2/rad^2, reaction torque coeff (yaw-doublet identified)
+static constexpr float OMEGA_MAX_REF = 838.0f;    // rad/s, flight-log-identified full-throttle omega
+static constexpr float V_BATT_REF    = 16.0f;     // V, paper's bench point
+static constexpr float KV_OURS       = 920.0f;
+static constexpr float KV_REF        = 880.0f;
+static constexpr float V_BATT_FALLBACK = 15.4f;   // V, used only if no live battery reading
 
 // initialize in the constructor
 AC_CustomControl_XYZ::AC_CustomControl_XYZ(AC_CustomControl& frontend, AP_AHRS_View*& ahrs, AC_AttitudeControl*& att_control,
@@ -94,43 +106,68 @@ void AC_CustomControl_XYZ::update_motor_pwms(void)
     }
 }
 
-// convert a single motor's commanded PWM into thrust, N, via the bench-fit
-// quadratic PWM->omega map and the K_T thrust coefficient.
-float AC_CustomControl_XYZ::pwm_to_thrust(float pwm_us)
+// convert a single motor's commanded PWM into angular velocity, rad/s, via the
+// fitted Gauthier et al. electro-mechanical model:
+//   omega = -alpha + sqrt(alpha^2 + (omega_max^2 + 2*alpha*omega_max) * T)
+// where T = (pwm_us-1000)/1000 in [0,1] is normalized throttle.
+// The sqrt argument is alpha^2 + T*(omega_max^2 + 2*alpha*omega_max); since
+// alpha, omega_max > 0 and T in [0,1], that argument is always >= alpha^2 > 0, so
+// omega is always real. At T=0, omega=0. At T=1, the argument is exactly
+// (alpha+omega_max)^2, so omega=omega_max. sqrt() is monotonic in T, so omega is
+// non-negative and monotonically non-decreasing over the whole PWM range.
+float AC_CustomControl_XYZ::pwm_to_omega(float pwm_us, float v_batt)
 {
-    float delta = (pwm_us - 1000.0f) / 1000.0f;
-    delta = constrain_float(delta, 0.0f, 1.0f);
-    float omega = OMEGA_A*delta*delta + OMEGA_B*delta + OMEGA_C;
-    if (omega < 0.0f) {
-        omega = 0.0f;
+    float T_i = (pwm_us - 1000.0f) / 1000.0f;
+    T_i = constrain_float(T_i, 0.0f, 1.0f);
+
+    const float omega_max = OMEGA_MAX_REF * (v_batt / V_BATT_REF) * (KV_OURS / KV_REF);
+    const float sqrt_arg = OMEGA_ALPHA*OMEGA_ALPHA
+        + (omega_max*omega_max + 2.0f*OMEGA_ALPHA*omega_max) * T_i;
+    return -OMEGA_ALPHA + sqrtf(sqrt_arg);
+}
+
+// quad-X mixer: 4 per-motor PWMs -> total thrust + body torques. See the
+// ROLL_FACTOR/PITCH_FACTOR/SPIN_DIR comment block above for the motor
+// order/geometry/spin-direction convention.
+void AC_CustomControl_XYZ::mix_quad_x(const float pwm_us[4], float v_batt, float k_t,
+                                       float &F_total, float &tau_x, float &tau_y, float &tau_z)
+{
+    F_total = 0.0f;
+    tau_x = 0.0f;
+    tau_y = 0.0f;
+    tau_z = 0.0f;
+
+    for (uint8_t i = 0; i < 4; i++) {
+        if (pwm_us[i] < 1000.0f) {
+            // motor not fitted (shouldn't happen for a quad-X frame, but mirrors
+            // the "not fitted" skip the octo version used for its unpopulated motors)
+            continue;
+        }
+        const float omega_i = pwm_to_omega(pwm_us[i], v_batt);
+        const float F_i     = k_t * omega_i * omega_i;   // N, thrust along motor +Z
+        const float tau_i   = K_Q * omega_i * omega_i;   // N.m, reaction torque magnitude
+        F_total += F_i;
+        tau_x   += Y_I[i] * F_i;
+        tau_y   += X_I[i] * F_i;
+        tau_z   += SPIN_DIR[i] * tau_i;
     }
-    return K_T * omega * omega;
 }
 
 // reconstruct the real per-axis torque and total thrust the motors just produced,
-// from this cycle's _pwm_motor1.._pwm_motor8 (see update_motor_pwms()).
+// from this cycle's _pwm_motor1.._pwm_motor4 (see update_motor_pwms()).
 void AC_CustomControl_XYZ::compute_real_torques(void)
 {
-    const float pwm[8] = { _pwm_motor1, _pwm_motor2, _pwm_motor3, _pwm_motor4,
-                            _pwm_motor5, _pwm_motor6, _pwm_motor7, _pwm_motor8 };
-    float F_total = 0.0f, tau_x = 0.0f, tau_y = 0.0f, tau_z = 0.0f;
+    const float pwm[4] = { _pwm_motor1, _pwm_motor2, _pwm_motor3, _pwm_motor4 };
 
-    for (uint8_t i = 0; i < 8; i++) {
-        if (pwm[i] < 1000.0f) {
-            // motor not fitted for this frame (quad-X leaves motor5..8 at 0)
-            continue;
-        }
-        const float T_i = pwm_to_thrust(pwm[i]);
-        const float Q_i = C_Q * T_i;
-        F_total += T_i;
-        tau_x   += ARM_L * T_i * ROLL_FACTOR[i];
-        tau_y   += ARM_L * T_i * PITCH_FACTOR[i];
-        tau_z   += Q_i * YAW_FACTOR[i];
+    // live pack voltage from the PM02D-HV power module, via whatever battery
+    // monitor instance is configured; fall back to a nominal-ish mid-pack voltage
+    // if no live reading is available yet (e.g. battery monitor not configured).
+    float v_batt = V_BATT_FALLBACK;
+    if (AP::battery().healthy()) {
+        v_batt = AP::battery().voltage();
     }
-    _F_total = F_total;
-    _tau_x = tau_x;
-    _tau_y = tau_y;
-    _tau_z = tau_z;
+
+    mix_quad_x(pwm, v_batt, k_t, _F_total, _tau_x, _tau_y, _tau_z);
 }
 
 // update controller
@@ -211,11 +248,11 @@ Vector3f AC_CustomControl_XYZ::update(void)
     // '<Root>/tau_z'
     float arg_tau_z = 0.0f;
 
-    float torque_limits_roll = 63.9f;
+    float torque_limits_roll = 5.43f;
 
-    float torque_limits_pitch = 63.9f;
+    float torque_limits_pitch = 3.36f;
 
-    float torque_limits_yaw = 3.19f;
+    float torque_limits_yaw = 0.209f;
 
     float u_roll;
 
@@ -228,6 +265,23 @@ Vector3f AC_CustomControl_XYZ::update(void)
     float arg_inverse_Iy_hat = 0.0f;
 
     float arg_inverse_Iz_hat = 0.0f;
+
+    // new outputs added to the regenerated Simulink step() signature
+    float arg_pdot = 0.0f;
+    float arg_error_phi = 0.0f;
+    float arg_dphi_hat = 0.0f;
+    float arg_P_Ix = 0.0f;
+    float arg_qdot = 0.0f;
+    float arg_P_Iy = 0.0f;
+    float arg_e_theta = 0.0f;
+    float arg_rdot = 0.0f;
+    float arg_e_psi = 0.0f;
+    float arg_P_Iz = 0.0f;
+    float arg_K_Ix = 0.0f;
+    float arg_K_Iy = 0.0f;
+    float arg_K_Iz = 0.0f;
+    float arg_dtheta_hat = 0.0f;
+    float arg_dpsi_hat = 0.0f;
 
 
 
@@ -279,8 +333,7 @@ Vector3f AC_CustomControl_XYZ::update(void)
     // torque_limits_roll  = 63.0f;
     // torque_limits_pitch = 63.0f;
 
-    torque_limits_roll  = 63.9f;
-    torque_limits_pitch = 63.9f;
+
 
     // // --- normalization (SAFE) ---
     // bool use_norm = true;
@@ -373,7 +426,10 @@ Vector3f AC_CustomControl_XYZ::update(void)
     simulink_controller.step(&arg_tau_y, &arg_tau_x, &arg_tau_z,
     &arg_r, &arg_psi_des, &arg_theta, &arg_q, &arg_theta_des, &arg_p, &arg_phi,
     &arg_psi, &arg_phi_des, &arg_inverse_Ix_hat, &arg_inverse_Iy_hat,
-    &arg_inverse_Iz_hat, &_prev_tau_x, &_prev_tau_y, &_prev_tau_z);
+    &arg_inverse_Iz_hat, &_prev_tau_x, &_prev_tau_y, &_prev_tau_z,
+    &arg_pdot, &arg_error_phi, &arg_dphi_hat, &arg_P_Ix, &arg_qdot, &arg_P_Iy,
+    &arg_e_theta, &arg_rdot, &arg_e_psi, &arg_P_Iz, &arg_K_Ix, &arg_K_Iy,
+    &arg_K_Iz, &arg_dtheta_hat, &arg_dpsi_hat);
 
     // don't let a non-finite output on any single axis reach the motors
     if (!isfinite(arg_tau_x)) {
@@ -417,7 +473,12 @@ Vector3f AC_CustomControl_XYZ::update(void)
     AP::logger().Write_HRLS(e_phi,e_theta,e_psi,arg_p,arg_q,arg_r,arg_tau_x,arg_tau_y,arg_tau_z);
     AP::logger().Write_ORLS(arg_inverse_Ix_hat, arg_inverse_Iy_hat, arg_inverse_Iz_hat);
     AP::logger().Write_RTAU(_tau_x, -_tau_y, -_tau_z, _F_total);
-    
+    AP::logger().Write_RLSE(arg_pdot, arg_qdot, arg_rdot,
+                             arg_error_phi, arg_e_theta, arg_e_psi);
+    AP::logger().Write_RLSH(arg_dphi_hat, arg_dtheta_hat, arg_dpsi_hat,
+                             arg_P_Ix, arg_P_Iy, arg_P_Iz,
+                             arg_K_Ix, arg_K_Iy, arg_K_Iz);
+
     #endif
 
     // GCS_SEND_TEXT(

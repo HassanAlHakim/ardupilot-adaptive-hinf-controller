@@ -680,6 +680,33 @@ struct PACKED log_RTAU {
     float f_total;  // total collective thrust reconstructed from commanded ESC PWM [N]
 };
 
+// labels strings are capped at LS_LABELS_SIZE (64 chars); the 15 new
+// step() outputs are split across two messages to stay under that limit.
+struct PACKED log_RLSE {
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    float pdot;      // roll  angular acceleration estimate [rad/s/s]
+    float qdot;      // pitch angular acceleration estimate [rad/s/s]
+    float rdot;      // yaw   angular acceleration estimate [rad/s/s]
+    float error_phi; // roll  attitude error, controller-internal [rad]
+    float e_theta;   // pitch attitude error, controller-internal [rad]
+    float e_psi;     // yaw   attitude error, controller-internal [rad]
+};
+
+struct PACKED log_RLSH {
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    float dphi_hat;   // roll  rate estimate from RLS filter [rad/s]
+    float dtheta_hat; // pitch rate estimate from RLS filter [rad/s]
+    float dpsi_hat;   // yaw   rate estimate from RLS filter [rad/s]
+    float P_Ix;       // roll  inverse-inertia RLS covariance term
+    float P_Iy;       // pitch inverse-inertia RLS covariance term
+    float P_Iz;       // yaw   inverse-inertia RLS covariance term
+    float K_Ix;       // roll  inverse-inertia RLS gain
+    float K_Iy;       // pitch inverse-inertia RLS gain
+    float K_Iz;       // yaw   inverse-inertia RLS gain
+};
+
 struct PACKED log_VER {
     LOG_PACKET_HEADER;
     uint64_t time_us;
@@ -1226,6 +1253,10 @@ LOG_STRUCTURE_FROM_GPS \
       "STRQ", "Qfff", "TimeUS,TorX,TorY,TorZ", "sttt", "F000", true }, \
     { LOG_RTAU_MSG, sizeof(log_RTAU), \
       "RTAU", "Qffff", "TimeUS,TauX,TauY,TauZ,Ftot", "s----", "F0000", true }, \
+    { LOG_RLSE_MSG, sizeof(log_RLSE), \
+      "RLSE", "Qffffff", "TimeUS,PDot,QDot,RDot,EPhi,ETheta,EPsi", "s------", "F000000", true }, \
+    { LOG_RLSH_MSG, sizeof(log_RLSH), \
+      "RLSH", "Qfffffffff", "TimeUS,DPhiHat,DThetaHat,DPsiHat,PIx,PIy,PIz,KIx,KIy,KIz", "s---------", "F000000000", true }, \
     { LOG_RCOUT2_MSG, sizeof(log_RCOUT2), \
       "RCO2",  "QHHHH",     "TimeUS,C15,C16,C17,C18", "sYYYY", "F----", true  }, \
     { LOG_RCOUT3_MSG, sizeof(log_RCOUT), \
@@ -1419,6 +1450,8 @@ enum LogMessages : uint8_t {
     LOG_ORLS_MSG,
     LOG_STRQ_MSG,
     LOG_RTAU_MSG,
+    LOG_RLSE_MSG,
+    LOG_RLSH_MSG,
     _LOG_LAST_MSG_
      
     // log_Mix

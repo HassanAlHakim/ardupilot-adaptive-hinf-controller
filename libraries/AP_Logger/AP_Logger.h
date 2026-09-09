@@ -223,6 +223,11 @@ public:
     void Write_ORLS(float inverse_Ix_hat,float inverse_Iy_hat,float inverse_Iz_hat);
     void Write_STRQ(float torque_x, float torque_y, float torque_z);
     void Write_RTAU(float tau_x, float tau_y, float tau_z, float f_total);
+    void Write_RLSE(float pdot, float qdot, float rdot,
+                     float error_phi, float e_theta, float e_psi);
+    void Write_RLSH(float dphi_hat, float dtheta_hat, float dpsi_hat,
+                     float P_Ix, float P_Iy, float P_Iz,
+                     float K_Ix, float K_Iy, float K_Iz);
 
     // erase handling
     void EraseAll();
